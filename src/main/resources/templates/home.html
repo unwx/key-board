@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="UTF-8">
     <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" rel="stylesheet">
@@ -8,8 +8,7 @@
     <title>key-home</title>
 </head>
 <body>
-<div>fine</div>
-
-<script src="/js/main.js"></script>
+<div id="app"></div>
+<script th:src="${isDevMode} ? 'http://localhost:8000/main.js' : '/js/main.js'"></script>
 </body>
 </html>

@@ -1,0 +1,35 @@
+{
+  "name": "keyB",
+  "version": "1.0.0",
+  "main": "home.js",
+  "license": "MIT",
+  "repository": "https://github.com/unwx/key-board.git",
+  "author": "Serhii <unwx.jv@gmail.com>",
+  "scripts": {
+    "start": "webpack serve"
+  },
+  "dependencies": {
+    "@babel/polyfill": "^7.12.1",
+    "@stomp/stompjs": "^6.0.0",
+    "sass": "^1.32.6",
+    "sass-loader": "^10.1.1",
+    "vue": "^2.6.12",
+    "vue-resource": "^1.5.1",
+    "vuex": "^3.6.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.12.13",
+    "@babel/preset-env": "^7.12.13",
+    "babel-loader": "^8.2.2",
+    "css-loader": "^5.0.1",
+    "style-loader": "^2.0.0",
+    "vue-loader": "^15.9.6",
+    "vue-style-loader": "^4.1.2",
+    "vue-template-compiler": "^2.6.12",
+    "vuetify": "^2.4.3",
+    "vuetify-loader": "^1.7.1",
+    "webpack": "^5.20.2",
+    "webpack-cli": "^4.5.0",
+    "webpack-dev-server": "^3.11.2"
+  }
+}
