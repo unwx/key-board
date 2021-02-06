@@ -5,6 +5,8 @@
   </div>
 </template>
 <script>
+import { mapState } from 'vuex'
+
 import AppBar from "../module/appBar.vue";
 import ArticleList from "../components/articles/ArticleList.vue";
 import ArticleForm from "../components/articles/ArticleForm.vue";
@@ -22,9 +24,7 @@ export default {
     ArticleList,
     AppBar
   },
-  beforeMount() {
-    this.$router.replace('/')
-  }
+  computed: mapState(['URI']),
 }
 </script>
 

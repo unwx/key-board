@@ -19,7 +19,7 @@ export default {
   name: "CreateArticleButton",
   methods: {
     createArticle() {
-      this.$router.push({path: '/article/create'})
+        this.$router.push({path: '/article/create'})
     }
   }
 }

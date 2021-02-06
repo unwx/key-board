@@ -9,7 +9,6 @@ Vue.use(VueRouter)
 const routes = [
     { path: '/article/create', component: ArticleCreatePage},
     { path: '/', component: ArticlePage},
-
 ]
 
 export default new VueRouter({

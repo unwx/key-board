@@ -7,7 +7,7 @@ import AppBar from "../module/appBar.vue";
 import ArticleForm from "../components/articles/ArticleForm.vue";
 export default {
   name: "ArticleCreatePage",
-  components: {ArticleForm, AppBar}
+  components: {ArticleForm, AppBar},
 }
 </script>
 

@@ -10,7 +10,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/**")
 public class HomeController {
 
     private final ArticleService articleService;
