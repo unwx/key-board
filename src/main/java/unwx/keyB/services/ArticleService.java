@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import unwx.keyB.domains.Article;
 import unwx.keyB.repositories.ArticleRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -29,6 +30,8 @@ public class ArticleService {
     }
 
     public Article save(@NotNull Article article){
+        article.setLink("translation of title");
+        article.setCreationDate(LocalDateTime.now());
         return articleRepository.save(article);
     }
 
