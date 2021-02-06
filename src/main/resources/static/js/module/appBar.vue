@@ -5,8 +5,7 @@
         hide-on-scroll
         elevation="3"
     >
-
-      <v-toolbar-title class="toolbar-title"><b><</b> Key - ? <b>></b></v-toolbar-title>
+        <a href="#" @click="goHome" class="toolbar-title">< Key - ? ></a>
 
       <v-spacer></v-spacer>
       <a class="text-title" href="#">Q & A</a>
@@ -21,7 +20,15 @@
 
 <script>
 export default {
-  name: "appBar"
+  name: "appBar",
+  methods: {
+    goHome() {
+      const homePath = '/';
+      if (this.$route.path !== homePath) {
+        this.$router.push("/");
+      }
+    }
+  }
 }
 </script>
 
@@ -32,6 +39,8 @@ export default {
   font-family: FreeMono, monospace;
   font-weight: 570;
   padding-left: 20px;
+  text-decoration: none;
+  color: black;
 }
 
 .text-title {
@@ -43,4 +52,5 @@ export default {
   color: black;
   text-decoration: none;
 }
+
 </style>

@@ -1,17 +1,20 @@
 <template>
   <div class="text">
-    <v-container>
+    <v-container class="container">
       <v-text-field
-          class="input mx-3"
+          class="item-title"
           placeholder="Введите заголовок"
       ></v-text-field>
 
+      <hr>
+
       <v-textarea
-          class="input mx-3"
+          class="item-body"
           placeholder="о чем хотите поделиться?"
+          rows="13"
       ></v-textarea>
 
-      <v-btn class="input">Опубликовать</v-btn>
+      <v-btn class="button">Опубликовать</v-btn>
     </v-container>
   </div>
 </template>
@@ -23,14 +26,40 @@ export default {
 </script>
 
 <style scoped>
+
+.container {
+  width: 1000px;
+  margin: 25px auto;
+  border-radius: 15px;
+  border-width: 0;
+}
+
+.item-title {
+  width: 1000px;
+  margin: 25px auto;
+  border-radius: 15px;
+  border-width: 0;
+}
+.item-body {
+  width: 1000px;
+  margin: 25px auto;
+  border-radius: 15px;
+  border-width: 1px;
+  border-color: black;
+}
+
 .text {
   font-size: 17px;
   font-family: Andale Mono, monospace;
 }
-.input {
-  width: 800px;
-  align-items: center;
-  padding-top: 20px;
-  padding-bottom: 20px;
+/*375*/
+.button {
+  width: 500px;
+  margin: 10px 250px;
+}
+
+hr {
+  width: 15%;
+  margin: auto;
 }
 </style>
