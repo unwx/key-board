@@ -1,32 +1,22 @@
 <template>
-  <v-card class="overflow-hidden">
+  <div>
     <v-app-bar
-        app
-        absolute
         color="#f7f5f5"
-        elevate-on-scroll
-        scroll-target="#scrolling-techniques-7"
+        hide-on-scroll
+        elevation="3"
     >
 
       <v-toolbar-title class="toolbar-title"><b><</b> Key - ? <b>></b></v-toolbar-title>
 
       <v-spacer></v-spacer>
-      <a class="text-title" href="#">{ Q & A }</a>
+      <a class="text-title" href="#">Q & A</a>
       <a class="text-title" href="#">About-us</a>
       <a class="text-title" href="#">Profile</a>
       <v-btn icon>
         <v-icon>logout</v-icon>
       </v-btn>
     </v-app-bar>
-    <v-sheet
-        id="scrolling-techniques-7"
-        class="overflow-y-auto"
-
-    >
-      <v-container style="height: 1500px;">
-      </v-container>
-    </v-sheet>
-  </v-card>
+  </div>
 </template>
 
 <script>

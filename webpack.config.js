@@ -15,7 +15,9 @@ module.exports = {
         stats: 'errors-only',
         clientLogLevel: 'error',
     },
+
     module: {
+
         rules: [
             {
                 test: /\.js$/,
@@ -64,7 +66,7 @@ module.exports = {
         ],
     },
     plugins: [
-        new VueLoaderPlugin()
+        new VueLoaderPlugin(),
     ],
     resolve: {
         modules: [
