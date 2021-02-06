@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div v-for="article in sortedArticles">
+    <div v-for="article in this.sortedArticles">
       <article-item
           :article="article"
       ></article-item>

@@ -20,7 +20,7 @@ export default {
   padding-top: 25px;
   padding-bottom: 25px;
   background-color: #f7f7f7;
-  margin: auto;
+  margin: 25px auto;
   border-radius: 50px;
   border-style: solid;
   border-color: black;
