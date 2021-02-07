@@ -5,12 +5,12 @@
         hide-on-scroll
         elevation="3"
     >
-        <a href="#" @click="goHome" class="toolbar-title">< Key - ? ></a>
+        <div @click="goHome" class="toolbar-title">< Key - ? ></div>
 
       <v-spacer></v-spacer>
-      <a class="text-title" href="#">Q & A</a>
-      <a class="text-title" href="#">About-us</a>
-      <a class="text-title" href="#">Profile</a>
+      <div class="text-title" @click="goHome">Q & A</div>
+      <div class="text-title" @click="goHome">About-us</div>
+      <div class="text-title" @click="goHome">Profile</div>
       <v-btn icon>
         <v-icon>logout</v-icon>
       </v-btn>
@@ -41,6 +41,7 @@ export default {
   padding-left: 20px;
   text-decoration: none;
   color: black;
+  cursor: pointer;
 }
 
 .text-title {
@@ -51,6 +52,7 @@ export default {
   font-weight: bold;
   color: black;
   text-decoration: none;
+  cursor: pointer;
 }
 
 </style>

@@ -9,7 +9,7 @@
 import CreateArticleButton from "../components/articles/CreateArticleButton.vue";
 import ArticleList from "../components/articles/ArticleList.vue";
 export default {
-  name: "ArticlePage",
+  name: "ArticlePages",
   components: {ArticleList, CreateArticleButton}
 }
 </script>

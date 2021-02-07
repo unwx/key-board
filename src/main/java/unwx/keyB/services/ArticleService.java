@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 import unwx.keyB.domains.Article;
 import unwx.keyB.repositories.ArticleRepository;
@@ -14,7 +15,10 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
-@PropertySource("classpath:valid.properties")
+@PropertySources({
+        @PropertySource("classpath:valid.properties"),
+        @PropertySource("classpath:uri.properties")
+})
 public class ArticleService {
 
     @Value("${article.title.maxlength}")

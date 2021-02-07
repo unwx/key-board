@@ -5,26 +5,24 @@
   </div>
 </template>
 <script>
-import { mapState } from 'vuex'
 
 import AppBar from "../module/appBar.vue";
 import ArticleList from "../components/articles/ArticleList.vue";
 import ArticleForm from "../components/articles/ArticleForm.vue";
 import CreateArticleButton from "../components/articles/CreateArticleButton.vue";
-import ArticlePage from "./ArticlePage.vue";
+import ArticlesPage from "./ArticlesPage.vue";
 import ArticleCreatePage from "./ArticleCreatePage.vue";
 
 export default {
   name: "HomeV.vue",
   components: {
     ArticleCreatePage,
-    ArticlePage,
+    ArticlesPage,
     CreateArticleButton,
     ArticleForm,
     ArticleList,
     AppBar
   },
-  computed: mapState(['URI']),
 }
 </script>
 

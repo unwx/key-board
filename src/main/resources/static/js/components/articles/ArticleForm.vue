@@ -45,7 +45,7 @@ export default {
         this.cleanSpaceSpamTitle();
       else this.error = "length error."
 
-      if (this.text.length < 15 || this.text.length > 5000 || this.title.length < 5 || this.title.length > 30){
+      if (this.text.length < 15 || this.text.length > 5000 || this.title.length < 5 || this.title.length > 30 || !(/^([ a-zA-Zа-ёА-ЯЁїЇіІ1-9]+)$/.test(this.title))){
         this.error = "length error."
       }
       else {

@@ -29,7 +29,7 @@ public class ArticleRestController {
     // TODO : start index, response size; (get page)
     @GetMapping()
     public List<Article> getAll(){
-        return articleService.getAll();
+         return articleService.getAll();
     }
 
     @GetMapping("{id}")

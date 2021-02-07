@@ -1,6 +1,6 @@
 <template>
     <div class="article">
-        <div class="title">{{article.title}}</div>
+        <div class="title" @click="show">{{article.title}}</div>
         <div class="text">{{article.text}}</div>
         <div class="date">{{article.creationDate}}</div>
         <div class="date">{{article.link}}</div>
@@ -11,7 +11,12 @@
 export default {
 
   name: "ArticleItem",
-  props: ['article']
+  props: ['article'],
+  methods: {
+    show() {
+      this.$router.push("/article/" + this.article.link)
+    }
+  }
 }
 </script>
 
@@ -36,14 +41,18 @@ export default {
   padding: 10px 20px;
   height: 50px;
   word-wrap: break-word;
+  text-decoration: none;
+  cursor: pointer;
 }
 .text {
+  max-height: 250px;
   font-family: monospace;
   font-size: 15px;
   margin: auto auto 15px;
   max-width: 800px;
   text-align: left;
   word-wrap: break-word;
+  overflow: hidden;
 }
 .date {
   font-family: Andale Mono, monospace;
