@@ -3,6 +3,7 @@
         <div class="title">{{article.title}}</div>
         <div class="text">{{article.text}}</div>
         <div class="date">{{article.creationDate}}</div>
+        <div class="date">{{article.link}}</div>
     </div>
 </template>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="text">
+  <div class="text" @keyup.enter="save">
     <v-container class="container">
 
       <div v-if="error !== null" class="error-message">
@@ -41,6 +41,10 @@ export default {
   methods: {
     ...mapActions(['addArticleAction']),
     save () {
+      if (this.title.length <= 30 && this.title.length >= 5)
+        this.cleanSpaceSpamTitle();
+      else this.error = "length error."
+
       if (this.text.length < 15 || this.text.length > 5000 || this.title.length < 5 || this.title.length > 30){
         this.error = "length error."
       }
@@ -54,6 +58,38 @@ export default {
         this.text = '';
         this.$router.push("/");
       }
+    },
+    cleanSpaceSpamTitle(){
+      let spaceCounter = 0;
+      let startIndex = -1;
+      let FLAG = false;
+      let length = this.title.length;
+      let title = this.title
+
+      for (let i = 0; i < length; i++) {
+
+        if (title[i] === ' '){
+          spaceCounter++;
+        } else if (spaceCounter === 1) {
+          spaceCounter--;
+        } else if (spaceCounter > 1) {
+          FLAG = true;
+        }
+
+        if (spaceCounter === 2){
+          startIndex = i - spaceCounter + 1;
+        }
+
+        if (spaceCounter > 1 && FLAG){
+          title = title.substr(0, startIndex) + title.substr(startIndex + spaceCounter - 1, title.length);
+          FLAG = false;
+          length = title.length;
+          i = i - spaceCounter;
+          spaceCounter = 0;
+          startIndex = -1;
+        }
+      }
+      this.title = title
     }
   }
 
