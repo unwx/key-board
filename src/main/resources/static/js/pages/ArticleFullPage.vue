@@ -5,11 +5,14 @@
     <p> {{article.text}} </p>
     <p> {{article.link}} </p>
     <p> {{article.creationDate}} </p>
+    <div v-html="text"></div>
   </div>
 </template>
 <!-- TODO: css styles. -->
 <script>
 import { mapGetters } from 'vuex'
+import marked from 'marked';
+import DOMPurify from 'dompurify'
 
 export default {
   name: "ArticleFullPage",
@@ -17,24 +20,30 @@ export default {
   data (){
     return {
       article: -1,
+      text: '',
     }
   },
   created () {
     this.findOne();
+    this.markdown();
   },
   methods: {
     findOne() {
       const link = this.$route.params.link;
       for (let i = 0; i < this.sortedArticles.length; i++){
-        console.log(`is ${this.$route.params.link} === ${link}`)
         if (link === this.sortedArticles[i].link)
           this.article = this.sortedArticles[i];
       }
-      console.log(this.article)
       if (this.article === -1){
-        this.$router.push("/error/404")
+        this.$router.replace("/error/404")
       }
     },
+    markdown () {
+      this.text = DOMPurify.sanitize(marked(this.article.text),
+          {ALLOWED_TAGS:
+                ['h1', 'h2', 'h3', 'h4', 'h5',
+                    'em', 'strong', 'ol', 'li', 'code', 'a'], ALLOWED_ATTR: ['class']})
+    }
   }
 }
 </script>

@@ -13,6 +13,8 @@
     "@babel/runtime": "^7.12.13",
     "@stomp/stompjs": "^6.0.0",
     "axios": "^0.21.1",
+    "dompurify": "^2.2.6",
+    "marked": "^2.0.0",
     "sass": "^1.32.6",
     "sass-loader": "^10.1.1",
     "vue": "^2.6.12",

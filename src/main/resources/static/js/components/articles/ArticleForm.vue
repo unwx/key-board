@@ -1,5 +1,5 @@
 <template>
-  <div class="text" @keyup.enter="save">
+  <div class="text">
     <v-container class="container">
 
       <div v-if="error !== null" class="error-message">
