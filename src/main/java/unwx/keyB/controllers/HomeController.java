@@ -11,6 +11,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/**")
+@SuppressWarnings("serial")
 public class HomeController {
 
     private final ArticleService articleService;
@@ -23,7 +24,6 @@ public class HomeController {
     public String home(Model model){
         model.addAttribute("isDevMode", true);
         model.addAttribute("frontendData", initFrontendData());
-
         return "home";
     }
 

@@ -14,5 +14,5 @@ new Vue({
     router,
     el: '#app',
     render: a => a(HomeV),
-
 })
+

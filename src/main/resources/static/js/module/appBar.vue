@@ -51,7 +51,8 @@ export default {
   padding-right: 35px;
   font-weight: bold;
   color: black;
-  text-decoration: none;
+  text-decoration-width: 3px;
+  text-decoration-color: black;
   cursor: pointer;
 }
 

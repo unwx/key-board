@@ -43,6 +43,7 @@ public class ArticleService {
         return articleRepository.findAll();
     }
 
+    @NotNull
     public Article getById(Long id) {
         return articleRepository.findById(id).orElseGet(Article::new);
     }

@@ -1,16 +1,16 @@
 package unwx.keyB.api;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.validation.BindingResult;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.beans.BeanUtils;
 import unwx.keyB.domains.Article;
+import unwx.keyB.exceptions.rest.exceptions.BadRequestException;
+import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 import unwx.keyB.services.ArticleService;
 import unwx.keyB.validators.ArticleValidator;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -28,41 +28,40 @@ public class ArticleRestController {
 
     // TODO : start index, response size; (get page)
     @GetMapping()
-    public List<Article> getAll(){
-         return articleService.getAll();
+    public ResponseEntity<List<Article>> getAll(){
+         return new ResponseEntity<>(articleService.getAll(), HttpStatus.OK);
     }
 
     @GetMapping("{id}")
-    public Article getOne(@PathVariable("id") Long id){
+    public ResponseEntity<Article> getOne(@PathVariable("id") Long id){
         Article article = articleService.getById(id);
         if (article.getId() == null) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("article not found.");
         }
         else {
-            return article;
+            return new ResponseEntity<>(article, HttpStatus.OK);
         }
     }
 
     @PostMapping()
-    public Article create(@RequestBody Article article){
+    public ResponseEntity<Article> create(@RequestBody Article article){
         if (!articleValidator.isValid(article)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("validation error.");
         }
         else {
-            return articleService.save(article);
+            return new ResponseEntity<>(articleService.save(article), HttpStatus.OK);
         }
     }
 
     @PutMapping("{id}")
-    public Article edit(@PathVariable("id") Article target,
-                        @Valid @RequestBody Article article,
-                        BindingResult bindingResult){
+    public ResponseEntity<Article> edit(@PathVariable("id") Article target,
+                                       @RequestBody Article article){
         if (!articleValidator.isValid(article)) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
+            throw new BadRequestException("validation error.");
         }
         else {
             BeanUtils.copyProperties(article, target, "id");
-            return articleService.save(article);
+            return new ResponseEntity<>(articleService.save(article), HttpStatus.OK);
         }
     }
 

@@ -5,6 +5,9 @@
       <div v-if="error !== null" class="error-message">
         {{error}}
       </div>
+      <div v-if="apiError !== null">
+        <p class="error-message">{{apiError.message}}</p>
+      </div>
 
       <v-text-field
           class="item-title"
@@ -28,9 +31,10 @@
 
 <script>
 import { mapActions } from 'vuex'
+import { mapState } from 'vuex'
 export default {
-
   name: "ArticleForm",
+  computed: mapState(['apiError']),
   data () {
     return {
       title: '',
@@ -38,9 +42,13 @@ export default {
       error: null,
     }
   },
+  errorCaptured(err,vm,info) {
+    console.log(`cat EC: ${err.toString()}\n info: ${info}`);
+    return false;
+  },
   methods: {
     ...mapActions(['addArticleAction']),
-    save () {
+    async save () {
       if (this.title.length <= 30 && this.title.length >= 5)
         this.cleanSpaceSpamTitle();
       else this.error = "length error."
@@ -53,10 +61,12 @@ export default {
           title: this.title,
           text: this.text,
         }
-        this.addArticleAction(article);
+        await this.addArticleAction(article);
         this.title = '';
         this.text = '';
-        this.$router.push("/");
+        if (this.apiError === null){
+          await this.$router.push("/");
+        }
       }
     },
     cleanSpaceSpamTitle(){
