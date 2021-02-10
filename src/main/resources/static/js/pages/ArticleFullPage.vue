@@ -1,12 +1,10 @@
 <template>
   <div class="page">
-    <v-container>
-      <div class="border">
-        <h1>{{ article.title }}</h1>
-      </div>
+    <v-container class="text">
+      <h1 class="title">{{ article.title }}</h1>
       <hr>
-      <div class="test">
-        <div v-html="text" class="text"></div>
+      <div class="code">
+        <markdown-display :text="text"></markdown-display>
       </div>
       <p class="date"> {{ article.creationDate }} </p>
     </v-container>
@@ -15,17 +13,17 @@
 <!-- TODO: css styles. -->
 <script>
 import {mapGetters} from 'vuex'
-import marked from 'marked';
-import DOMPurify from 'dompurify'
+import MarkdownDisplay from "../module/MarkdownDisplay.vue";
 
 export default {
   name: "ArticleFullPage",
+  components: {MarkdownDisplay},
   computed: mapGetters(['sortedArticles']),
   data() {
     return {
       article: -1,
       text: '',
-      test: "<strong>hi</strong>"
+      test: "<code class=\"language-html\">int main() {}</code>"
     }
   },
   created() {
@@ -44,12 +42,7 @@ export default {
       }
     },
     markdown() {
-      this.text = DOMPurify.sanitize(marked(this.article.text),
-          {
-            ALLOWED_TAGS:
-                ['h2', 'h3', 'h4', 'h5',
-                  'em', 'strong', 'ol', 'li', 'code', 'a'], ALLOWED_ATTR: ['href']
-          })
+      this.text = this.article.text
     }
   }
 }
@@ -61,38 +54,44 @@ export default {
 }
 
 h1 {
-  margin-top: 25px;
-  margin-bottom: 25px;
+  margin-top: 10px;
   text-align: center;
 }
 
-.border {
-  margin: auto;
-  width: 600px;
-  border-style: solid;
-  border-color: black;
-  padding: 10px;
-  border-radius: 25px;
-  border-width: 1px;
+.title {
+  margin-top: 25px;
+  height: auto;
+  text-align: center;
+  font-size: 25px;
 }
 
 hr {
   width: 70%;
-  margin: 25px auto;
+  margin: 0 auto;
 }
 
 .text {
-  font-size: 21px;
+  font-size: 18px;
   padding-top: 5px;
   padding-bottom: 5px;
+  white-space: pre-wrap;
 }
 
-.test >>> code{
-  font-size: 30px;
-}
-
-strong {
-  font-size: 500px;
+.code >>> code {
+  background-color: #f4f4f4;
+  border: 1px solid #ddd;
+  border-left: 3px solid #88aaff;
+  page-break-inside: avoid;
+  font-family: monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  margin: 5px 0;
+  max-width: 100%;
+  overflow: auto;
+  padding: 17px 25px;
+  display: block;
+  word-wrap: break-word;
+  white-space: pre-wrap;
 }
 
 .date {

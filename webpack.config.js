@@ -63,6 +63,7 @@ module.exports = {
                 ],
                 test: /\.s(c|a)ss$/,
             },
+
         ],
     },
     plugins: [

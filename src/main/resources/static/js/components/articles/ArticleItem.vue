@@ -1,6 +1,7 @@
 <template>
     <div class="article">
         <div class="title" @click="show">{{article.title}}</div>
+        <hr style="width: 35%; margin: auto auto 7px;">
         <div class="text">{{article.text}}</div>
         <div class="date">{{article.creationDate}}</div>
         <div class="date">{{article.link}}</div>
@@ -25,7 +26,7 @@ export default {
   width: 1000px;
   padding-top: 25px;
   padding-bottom: 25px;
-  background-color: #f7f7f7;
+  background-color: #effffc;
   margin: 25px auto;
   border-radius: 50px;
   border-style: solid;
