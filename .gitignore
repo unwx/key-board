@@ -5,6 +5,7 @@ target/
 !**/src/test/**/target/
 node_modules
 yarn-error.log
+*.keys_rsa_2048
 ### IntelliJ IDEA ###
 .idea
 *.iws

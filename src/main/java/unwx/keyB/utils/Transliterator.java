@@ -1,4 +1,4 @@
-package unwx.keyB.services.auxiliary;
+package unwx.keyB.utils;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import marked, {Renderer} from 'marked'
+import marked from 'marked'
 import DOMPurify from 'dompurify'
 import highlight from 'highlight.js'
 import 'highlight.js/styles/srcery.css'
@@ -29,7 +29,6 @@ export default {
   props: ['text'],
   methods: {
     codeProcess(s) {
-      console.log(s)
       if (this.isNestedCodeEnding(s)) {
         return s
       } else {
@@ -62,7 +61,6 @@ export default {
       const openResult = [...s.matchAll(codeOpenTag)]
       const closeResult = [...s.matchAll(codeCloseTag)]
 
-      console.log(openResult.length, closeResult.length)
       return openResult.length + closeResult.length !== 0;
     }
   }

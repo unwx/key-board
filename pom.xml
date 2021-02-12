@@ -7,7 +7,7 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>2.4.2</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>unwx</groupId>
@@ -23,6 +23,11 @@
         <mysql-connector-version>8.0.22</mysql-connector-version>
         <jetbrains-annotations-version>20.1.0</jetbrains-annotations-version>
         <html-parser-jsoup-version>1.13.1</html-parser-jsoup-version>
+        <java-jwt-version>3.13.0</java-jwt-version>
+        <bcprov-jdk16-version>1.46</bcprov-jdk16-version>
+        <junit-jupiter-api-version>5.7.1</junit-jupiter-api-version>
+        <httpclient-version>4.5.13</httpclient-version>
+        <assertj-core-version>3.19.0</assertj-core-version>
     </properties>
 
     <dependencies>
@@ -48,6 +53,18 @@
             <version>${spring-boot-version}</version>
             <scope>runtime</scope>
             <optional>true</optional>
+        </dependency>
+
+        <!--	=================== Security ===================       -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>${java-jwt-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+            <version>${spring-boot-version}</version>
         </dependency>
 
         <!--	=================== Database ===================       -->
@@ -89,6 +106,24 @@
             <version>${spring-boot-version}</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-api</artifactId>
+            <version>${junit-jupiter-api-version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.hamcrest</groupId>
+            <artifactId>hamcrest-all</artifactId>
+            <version>1.3</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>${httpclient-version}</version>
+        </dependency>
+
 
         <!--	=================== Other ===================    -->
 
@@ -97,6 +132,11 @@
             <groupId>org.jsoup</groupId>
             <artifactId>jsoup</artifactId>
             <version>${html-parser-jsoup-version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk16</artifactId>
+            <version>${bcprov-jdk16-version}</version>
         </dependency>
 
 

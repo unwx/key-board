@@ -68,10 +68,6 @@ export default {
       error: null,
     }
   },
-  errorCaptured(err, vm, info) {
-    console.log(`cat EC: ${err.toString()}\n info: ${info}`);
-    return false;
-  },
   methods: {
     ...mapActions(['addArticleAction']),
     async save() {

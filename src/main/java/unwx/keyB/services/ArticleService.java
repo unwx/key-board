@@ -9,7 +9,7 @@ import org.springframework.context.annotation.PropertySources;
 import org.springframework.stereotype.Service;
 import unwx.keyB.domains.Article;
 import unwx.keyB.repositories.ArticleRepository;
-import unwx.keyB.services.auxiliary.Transliterator;
+import unwx.keyB.utils.Transliterator;
 
 import java.time.LocalDateTime;
 import java.util.List;
