@@ -6,6 +6,7 @@ target/
 node_modules
 yarn-error.log
 *.keys_rsa_2048
+https.p12
 ### IntelliJ IDEA ###
 .idea
 *.iws

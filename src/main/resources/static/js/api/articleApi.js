@@ -1,4 +1,3 @@
-// import axios from "axios";
 import 'regenerator-runtime/runtime'
 import axios from "axios";
 
@@ -10,4 +9,10 @@ export default {
     })
     // TODO : UPDATE;
     // TODO : REMOVE;
+
+//  const agent = new https.Agent({
+//  rejectUnauthorized: false
+//  });
+//
+// axios.get('https://something.com/foo', { httpsAgent: agent });
 }
