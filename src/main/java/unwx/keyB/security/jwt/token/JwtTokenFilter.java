@@ -3,6 +3,7 @@ package unwx.keyB.security.jwt.token;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
+import unwx.keyB.dto.ClaimsDto;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -24,13 +25,28 @@ public class JwtTokenFilter extends GenericFilterBean {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) servletRequest);
 
-        if (token != null && jwtTokenProvider.validate(token)) {
-            Authentication authentication = jwtTokenProvider.getAuthentication(token);
-
-            if (authentication != null) {
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+        if (token != null) {
+            JwtStatus jwtValidationStatus = jwtTokenProvider.validate(token);
+            if (jwtValidationStatus == JwtStatus.VALID) {
+                ClaimsDto claims = jwtTokenProvider.getClaims(token);
+                String type = claims.getClaims().get("type").asString();
+                if (type.equals("access") && !((HttpServletRequest) servletRequest).getRequestURI().equals("/api/auth/refresh"))
+                    processAccessToken(token);
+                if (type.equals("refresh") && ((HttpServletRequest) servletRequest).getRequestURI().equals("/api/auth/refresh"))
+                    processRefreshToken(servletRequest, claims);
             }
         }
         filterChain.doFilter(servletRequest, servletResponse);
+    }
+
+    private void processAccessToken(String token) {
+        Authentication authentication = jwtTokenProvider.getAuthentication(token);
+        if (authentication != null) {
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+        }
+    }
+
+    private void processRefreshToken(ServletRequest servletRequest, ClaimsDto claims) {
+        servletRequest.setAttribute("claims", claims);
     }
 }

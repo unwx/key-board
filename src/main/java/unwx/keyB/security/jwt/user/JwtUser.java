@@ -15,6 +15,8 @@ public class JwtUser implements UserDetails {
     private final String password;
     private final String email;
     private final boolean enabled;
+    private final String accessTokenExpiration;
+    private final String refreshTokenExpiration;
     private final Collection<? extends GrantedAuthority> authorities;
 
     public JwtUser(
@@ -22,14 +24,16 @@ public class JwtUser implements UserDetails {
             String username,
             String email,
             String password, Collection<? extends GrantedAuthority> authorities,
-            boolean enabled
-    ) {
+            boolean enabled,
+            String accessTokenExpiration, String refreshTokenExpiration) {
         this.id = id;
         this.username = username;
         this.email = email;
         this.password = password;
         this.authorities = authorities;
         this.enabled = enabled;
+        this.accessTokenExpiration = accessTokenExpiration;
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
     @JsonIgnore
@@ -80,4 +84,11 @@ public class JwtUser implements UserDetails {
         return enabled;
     }
 
+    public String getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
+
+    public String getRefreshTokenExpiration() {
+        return refreshTokenExpiration;
+    }
 }

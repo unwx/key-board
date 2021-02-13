@@ -7,8 +7,6 @@ import java.util.Set;
 @Table
 public class User {
 
-    private static final long serialVersionUID = -1207958636187754662L;
-
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -25,17 +23,41 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    /*
+    * if a token is stolen, an attacker can use it forever,
+    * so this identifier (token life length) will be checked against the user's current token
+    * so that when a new token is created, the old one is irrelevant,
+    * despite its validity
+    */
+    @Column(name = "access_expiration", length = 30)
+    private String accessTokenExpiration;
+    @Column(name = "refresh_expiration", length = 30)
+    private String refreshTokenExpiration;
+
+    @Transient
+    private String accessToken;
+    @Transient
+    private String refreshToken;
+
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
 
-    public User(String username, String password, boolean active, Set<Role> roles, String email) {
+    public User(String username,
+                String password,
+                boolean active,
+                Set<Role> roles,
+                String email,
+                String accessTokenExpiration,
+                String refreshTokenExpiration) {
         this.username = username;
         this.password = password;
         this.active = active;
         this.roles = roles;
         this.email = email;
+        this.accessTokenExpiration = accessTokenExpiration;
+        this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
     public User() {
@@ -89,5 +111,39 @@ public class User {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    public String getAccessTokenExpiration() {
+        return accessTokenExpiration;
+    }
+
+    public void setAccessTokenExpiration(String accessTokenExpiration) {
+        this.accessTokenExpiration = accessTokenExpiration;
+    }
+
+    public String getRefreshTokenExpiration() {
+        return refreshTokenExpiration;
+    }
+
+    public void setRefreshTokenExpiration(String refreshTokenExpiration) {
+        this.refreshTokenExpiration = refreshTokenExpiration;
+    }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
+    }
+
+
 
 }

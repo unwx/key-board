@@ -1,28 +1,30 @@
 package unwx.keyB.dto;
 
+import unwx.keyB.domains.User;
+
 public class AuthenticationResponseDto {
 
-    private String username;
-    private String token;
+    private User user;
+    private JwtDto tokens;
 
-    public String getUsername() {
-        return username;
+    public AuthenticationResponseDto(User user, JwtDto tokens) {
+        this.user = user;
+        this.tokens = tokens;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
+    public JwtDto getTokens() {
+        return tokens;
     }
 
-    public String getToken() {
-        return token;
+    public void setTokens(JwtDto tokens) {
+        this.tokens = tokens;
     }
 
-    public void setToken(String token) {
-        this.token = token;
+    public User getUser() {
+        return user;
     }
 
-    public AuthenticationResponseDto(String username, String token) {
-        this.username = username;
-        this.token = token;
+    public void setUser(User user) {
+        this.user = user;
     }
 }

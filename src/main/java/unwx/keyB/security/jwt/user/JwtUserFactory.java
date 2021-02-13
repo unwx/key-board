@@ -14,7 +14,8 @@ public final class JwtUserFactory {
                 user.getEmail(),
                 user.getPassword(),
                 user.getRoles(),
-                user.isActive()
-        );
+                user.isActive(),
+                user.getAccessTokenExpiration(),
+                user.getRefreshTokenExpiration());
     }
 }
