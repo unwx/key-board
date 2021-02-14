@@ -30,13 +30,18 @@ public class ArticleValidator {
         if (t == null)
             return false;
 
-        String text = t.getText().trim();
-        String title = t.getTitle().trim();
+        String text = t.getText();
+        String title = t.getTitle();
+        if (text == null || title == null)
+            return false;
 
-        return text.length() >= MIN_TEXT_LENGTH &&
-                text.length() <= MAX_TEXT_LENGTH &&
-                title.length() >= MIN_TITLE_LENGTH &&
-                title.length() <= MAX_TITLE_LENGTH;
+        int textLen = t.getText().trim().length();
+        int titleLen = t.getTitle().trim().length();
+
+        return textLen >= MIN_TEXT_LENGTH &&
+                textLen <= MAX_TEXT_LENGTH &&
+                titleLen >= MIN_TITLE_LENGTH &&
+                titleLen <= MAX_TITLE_LENGTH;
 
     }
 }

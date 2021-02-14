@@ -10,24 +10,45 @@
       <v-spacer></v-spacer>
       <div class="text-title" @click="goHome">Q & A</div>
       <div class="text-title" @click="goHome">About-us</div>
-      <div class="text-title" @click="goHome">Profile</div>
-      <v-btn icon>
-        <v-icon>logout</v-icon>
-      </v-btn>
+      <div v-if="isSigned" class="text-title" @click="goSignIn">
+        <v-btn
+            outlined
+            color="#33b4ff"
+        >
+          Sign in
+        </v-btn>
+      </div>
+      <div v-else class="text-title" @click="goHome">Profile</div>
     </v-app-bar>
   </div>
 </template>
 
 <script>
+import cookies from "vue-cookies";
 export default {
   name: "appBar",
+  data() {
+    return {
+      isSigned: null,
+    }
+  },
   methods: {
     goHome() {
       const homePath = '/';
       if (this.$route.path !== homePath) {
-        this.$router.push("/");
+        this.$router.push(homePath);
       }
-    }
+    },
+    goSignIn() {
+      const signInPath = '/sign-in';
+      if (this.$route.path !== signInPath) {
+        this.$router.push(signInPath);
+      }
+    },
+  },
+  beforeCreate() {
+      const user = cookies.get("user");
+      this.isSigned = user === null;
   }
 }
 </script>

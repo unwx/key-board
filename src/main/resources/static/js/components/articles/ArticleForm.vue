@@ -6,7 +6,7 @@
         <div v-if="error !== null" class="error-message">
           {{ error }}
         </div>
-        <div v-if="apiError !== null">
+        <div v-if="this.apiError !== null">
           <p class="error-message">{{ apiError.message }}</p>
         </div>
 
@@ -60,7 +60,7 @@ import {mapActions, mapState} from 'vuex'
 
 export default {
   name: "ArticleForm",
-  computed: mapState(['apiError']),
+  computed: mapState(['apiError', 'clientError']),
   data() {
     return {
       title: '',
@@ -69,8 +69,9 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['addArticleAction']),
+    ...mapActions(['addArticleAction', 'clearErrorsAction']),
     async save() {
+      await this.clearErrorsAction();
       if (this.title.length <= 30 && this.title.length >= 5)
         this.cleanSpaceSpamTitle();
       else this.error = "title length must be >= 5 and <= 30"
@@ -85,9 +86,11 @@ export default {
         await this.addArticleAction(article);
         this.title = '';
         this.text = '';
-        if (this.apiError === null) {
-          await this.$router.push("/");
+        if (this.clientError !== null) {
+          await this.$router.push('/sign-in');
         }
+        else if (this.apiError === null)
+          await this.$router.push("/");
       }
     },
     cleanSpaceSpamTitle() {

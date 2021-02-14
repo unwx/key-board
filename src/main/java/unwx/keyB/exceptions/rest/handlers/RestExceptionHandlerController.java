@@ -12,7 +12,7 @@ import unwx.keyB.exceptions.rest.messages.ErrorMessage;
 import java.util.Date;
 
 @RestControllerAdvice
-public class ExceptionHandlerController {
+public class RestExceptionHandlerController {
 
     @ExceptionHandler(BadRequestException.class)
     @ResponseStatus(value = HttpStatus.BAD_REQUEST)
