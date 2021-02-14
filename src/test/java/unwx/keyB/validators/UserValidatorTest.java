@@ -16,7 +16,7 @@ public class UserValidatorTest {
      * user.password.minlength = 8
      * user.password.maxlength = 30
      * user.email.minlength = 5
-     * user.email.maxlength = 100
+     * user.email.maxlength = 64
      */
     @Autowired
     UserValidator userValidator;
@@ -109,11 +109,7 @@ public class UserValidatorTest {
                         "1234567890" +
                         "1234567890" +
                         "1234567890" +
-                        "1234567890" +
-                        "1234567890" +
-                        "1234567890" +
-                        "1234567890" +
-                        "1");
+                        "12345");
         assertThat(userValidator.isValidRegistration(user)).isFalse();
     }
 

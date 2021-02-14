@@ -90,7 +90,7 @@ export default {
         EF = true;
       }
       const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-      if (!re.test(this.email.toLowerCase())) {
+      if (!re.test(this.email.toLowerCase()) || this.email.length > 64 || this.email.length < 5) {
         this.error = "incorrect email"
         EF = true;
       }
