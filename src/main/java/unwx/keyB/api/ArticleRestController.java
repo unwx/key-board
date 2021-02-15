@@ -1,75 +1,172 @@
 package unwx.keyB.api;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import unwx.keyB.domains.Article;
-import unwx.keyB.exceptions.rest.exceptions.BadRequestException;
-import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
+import unwx.keyB.dto.ArticleCreateRequest;
+import unwx.keyB.dto.ArticleEditRequest;
 import unwx.keyB.services.ArticleService;
-import unwx.keyB.validators.ArticleValidator;
 
 import java.util.List;
+// TODO : start index, response size; (get page)
+// TODO: JSON view.
 
 @RestController
 @RequestMapping("/api/article")
 @PreAuthorize("hasAuthority('USER')")
+/*
+   access token required.
+   headers: {Authorization:Bearer_{access token}}
+ */
 public class ArticleRestController {
 
     private final ArticleService articleService;
-    private final ArticleValidator articleValidator;
 
     @Autowired
-    public ArticleRestController(ArticleService articleService, ArticleValidator articleValidator) {
+    public ArticleRestController(ArticleService articleService) {
         this.articleService = articleService;
-        this.articleValidator = articleValidator;
     }
 
-    // TODO : start index, response size; (get page)
+    /**
+     * @uri
+     * /api/article
+     *
+     * @method
+     * get
+     *
+     * @request
+     * -
+     *
+     * @response
+     * [
+     *      Article {
+     *          id: long
+     *          title: string
+     *          link: string
+     *          text: string
+     *          creationDate: string
+     *      }
+     *      ...
+     * ]
+     */
     @GetMapping()
     public ResponseEntity<List<Article>> getAll(){
          return new ResponseEntity<>(articleService.getAll(), HttpStatus.OK);
     }
 
+    /**
+     * @uri
+     * /api/article/{id}
+     *
+     * @path-variable
+     * id: long
+     *
+     * @method
+     * get
+     *
+     * @request
+     * -
+     *
+     * @response
+     * (OK):
+     * Article {
+     *     id: long {id}
+     *     title: string
+     *     link: string
+     *     text: string
+     *     creationDate: string
+     * }
+     *
+     * (ResourceNotFoundException):
+     * ErrorMessage {
+     *      statusCode: int
+     *      timestamp: string
+     *      message: string
+     *      description: string
+     * }
+     */
     @GetMapping("{id}")
     public ResponseEntity<Article> getOne(@PathVariable("id") Long id){
-        Article article = articleService.getById(id);
-        if (article.getId() == null) {
-            throw new ResourceNotFoundException("article not found.");
-        }
-        else {
-            return new ResponseEntity<>(article, HttpStatus.OK);
-        }
+        return articleService.getById(id);
     }
 
+
+    /**
+     * @uri
+     * /api/article
+     *
+     * @method
+     * post
+     *
+     * @request
+     * Article {
+     *      title: string |MIN_TITLE_LENGTH: 5; MAX_TITLE_LENGTH: 30|
+     *      text: string |MIN_TEXT_LENGTH: 15; MAX_TEXT_LENGTH: 5000|
+     * }
+     *
+     * @response
+     * (OK):
+     * Article {
+     *     id: long
+     *     title: string
+     *     link: string
+     *     text: string
+     *     creationDate: string
+     * }
+     *
+     * (BadRequestException):
+     * ErrorMessage {
+     *      statusCode: int
+     *      timestamp: string
+     *      message: string
+     *      description: string
+     * }
+     */
     @PostMapping()
-    public ResponseEntity<Article> create(@RequestBody Article article){
-        if (!articleValidator.isValid(article)) {
-            throw new BadRequestException("validation error.");
-        }
-        else {
-            return new ResponseEntity<>(articleService.save(article), HttpStatus.OK);
-        }
+    public ResponseEntity<Article> create(@RequestBody ArticleCreateRequest article){
+        return articleService.createArticle(article);
     }
 
-    @PutMapping("{id}")
-    public ResponseEntity<Article> edit(@PathVariable("id") Article target,
-                                       @RequestBody Article article){
-        if (!articleValidator.isValid(article)) {
-            throw new BadRequestException("validation error.");
-        }
-        else {
-            BeanUtils.copyProperties(article, target, "id");
-            return new ResponseEntity<>(articleService.save(article), HttpStatus.OK);
-        }
+    /**
+     * @uri
+     * /api/article
+     *
+     * @method
+     * put
+     *
+     * @request
+     * Article {
+     *     id: long |should be correct, target to be changed|; target!
+     *     title: string |replacement title; MIN_TITLE_LENGTH: 5; MAX_TITLE_LENGTH: 30|
+     *     text: string |replacement text; MIN_TEXT_LENGTH: 15; MAX_TEXT_LENGTH: 5000|
+     * }
+     *
+     * @response
+     */
+    @PutMapping()
+    public ResponseEntity<Article> edit(@RequestBody ArticleEditRequest article) {
+        return articleService.editArticle(article);
     }
 
+    /**
+     * @uri
+     * /api/article/{id}
+     *
+     * @method
+     * delete
+     *
+     * @request
+     * -
+     *
+     * @response
+     * httpStatus: httpStatus
+     */
     @DeleteMapping("{id}")
-    public void delete(@PathVariable("id") Article article){
-        articleService.delete(article);
+    public HttpStatus delete(@PathVariable("id") Article article){
+        return articleService.delete(article);
     }
 
 }

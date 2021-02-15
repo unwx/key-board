@@ -4,15 +4,12 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
-import unwx.keyB.domains.Article;
+import unwx.keyB.dto.ArticleCreateRequest;
+import unwx.keyB.dto.ArticleEditRequest;
 
-/**
- * '@Valid', BindingResult doesn't work :(
- *  memory safe, non static
- */
 @Component
 @PropertySource("classpath:valid.properties")
-public class ArticleValidator {
+public class ArticleValidator extends Validator{
 
     @Value("${article.text.maxlength}")
     private Short MAX_TEXT_LENGTH;
@@ -26,22 +23,28 @@ public class ArticleValidator {
     @Value("${article.title.minlength}")
     private Short MIN_TITLE_LENGTH;
 
-    public boolean isValid(@Nullable Article t){
+    public boolean isValidToCreate(@Nullable ArticleCreateRequest t) {
         if (t == null)
             return false;
 
-        String text = t.getText();
-        String title = t.getTitle();
-        if (text == null || title == null)
+        return areAttributesAreNotNull(t.getText(), t.getTitle()) &&
+                isLengthValid(t.getText().trim().length(), t.getTitle().trim().length());
+    }
+
+    public boolean isValidToEdit(@Nullable ArticleEditRequest t) {
+        if (t == null)
             return false;
 
-        int textLen = t.getText().trim().length();
-        int titleLen = t.getTitle().trim().length();
-
-        return textLen >= MIN_TEXT_LENGTH &&
-                textLen <= MAX_TEXT_LENGTH &&
-                titleLen >= MIN_TITLE_LENGTH &&
-                titleLen <= MAX_TITLE_LENGTH;
-
+        long id = t.getTargetId();
+        return areAttributesAreNotNull(id, t.getText(), t.getTitle()) &&
+                isLengthValid(t.getText().trim().length(), t.getTitle().trim().length());
     }
+
+    private boolean isLengthValid(int textLength, int titleLength) {
+        return textLength >= MIN_TEXT_LENGTH &&
+                textLength <= MAX_TEXT_LENGTH &&
+                titleLength >= MIN_TITLE_LENGTH &&
+                titleLength <= MAX_TITLE_LENGTH;
+    }
+
 }

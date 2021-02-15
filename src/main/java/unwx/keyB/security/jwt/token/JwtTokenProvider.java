@@ -72,25 +72,25 @@ public class JwtTokenProvider {
     }
 
     public JWTokenData createAccess(User user) {
-        Date expiration = new Date(getCurrentTimeAtMillis() + accessExpirationTime);
+        long expiration = new Date(getCurrentTimeAtMillis() + accessExpirationTime).getTime();
         String token = JWT.create().
                 withIssuer("key-b")
                 .withClaim("type", "access")
                 .withSubject(user.getUsername())
-                .withExpiresAt(expiration)
+                .withClaim("expiration", String.valueOf(expiration))
                 .sign(algorithm);
-        return new JWTokenData(token, expiration.getTime());
+        return new JWTokenData(token, expiration);
     }
 
     public JWTokenData createRefresh(User user) {
-        Date expiration = new Date(getCurrentTimeAtMillis() + refreshExpirationTime);
+        long expiration = new Date(getCurrentTimeAtMillis() + refreshExpirationTime).getTime();
         String token = JWT.create().
                 withIssuer("key-b")
                 .withClaim("type", "refresh")
                 .withSubject(user.getUsername())
-                .withExpiresAt(expiration)
+                .withClaim("expiration", String.valueOf(expiration))
                 .sign(algorithm);
-        return new JWTokenData(token, expiration.getTime());
+        return new JWTokenData(token, expiration);
     }
 
     public JwtStatus validate(String token) {
@@ -99,9 +99,8 @@ public class JwtTokenProvider {
                     .withIssuer("key-b")
                     .build()
                     .verify(token);
+            long dateAtMillis = Long.parseLong(jwtDecoded.getClaim("expiration").asString());
 
-            Date date = jwtDecoded.getExpiresAt();
-            long dateAtMillis = date.toInstant().toEpochMilli();
             if (getCurrentTimeAtMillis() > dateAtMillis)
                 return JwtStatus.EXPIRED;
 
@@ -134,9 +133,7 @@ public class JwtTokenProvider {
     }
 
     private boolean isTokenActual(long tokenExpiration, long actualTokenExpiration) {
-        long tokenExpirationAtSeconds = tokenExpiration / 1000;
-        long actualTokenExpirationAtSeconds = actualTokenExpiration / 1000;
-        return tokenExpirationAtSeconds == actualTokenExpirationAtSeconds;
+        return tokenExpiration == actualTokenExpiration;
     }
 
 }

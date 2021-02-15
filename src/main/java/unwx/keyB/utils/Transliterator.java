@@ -17,18 +17,6 @@ public class Transliterator {
         else throw new IllegalArgumentException();
     }
 
-    /**
-     * @param minLength
-     * -1 for ignore
-     * @param maxLength
-     * -1 for ignore
-     */
-    public String transliterate(String s, short minLength, short maxLength){
-         if (isValidToTransliterate(s, minLength, maxLength)){
-             return _transliterate(s);
-         }
-         else throw new IllegalArgumentException("cannot to transliterate; incorrect input data: " + s);
-    }
 
     private String _transliterate(String s) {
         String t = s.trim();
@@ -77,21 +65,6 @@ public class Transliterator {
         return isStringCorrect(s);
     }
 
-    /**
-     * @param minLength
-     * -1 for ignore
-     * @param maxLength
-     * -1 for ignore
-     */
-    private boolean isValidToTransliterate(@Nullable String s, short minLength, short maxLength){
-        if (s == null)
-            return false;
-        if (minLength > -1 && s.length() < minLength)
-            return false;
-        if (maxLength > -1 && s.length() > maxLength)
-            return false;
-        return isStringCorrect(s);
-    }
 
     /**
      * @regex

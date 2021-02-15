@@ -3,7 +3,8 @@ package unwx.keyB.validators;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import unwx.keyB.domains.User;
+import unwx.keyB.dto.UserLoginRequest;
+import unwx.keyB.dto.UserRegistrationRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -11,12 +12,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class UserValidatorTest {
 
     /**
-     * user.username.minlength = 2
-     * user.username.maxlength = 15
-     * user.password.minlength = 8
-     * user.password.maxlength = 30
-     * user.email.minlength = 5
-     * user.email.maxlength = 64
+     * user.username.minlength = 2 <br>
+     * user.username.maxlength = 15 <br>
+     * user.password.minlength = 8 <br>
+     * user.password.maxlength = 30 <br>
+     * user.email.minlength = 5 <br>
+     * user.email.maxlength = 64 <br>
      */
     @Autowired
     UserValidator userValidator;
@@ -27,82 +28,78 @@ public class UserValidatorTest {
     }
 
     @Test
-    public void nullValidateLogin() {
-        User user = null;
-        assertThat(userValidator.isValidLogin(user)).isFalse();
-    }
-
-    @Test
-    public void nullValidateRegistration() {
-        User user = null;
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+    public void nullValidate() {
+        UserLoginRequest userLoginRequest = null;
+        UserRegistrationRequest userRegistrationRequest = null;
+        assertThat(userValidator.isValidLogin(userLoginRequest)).isFalse();
+        assertThat(userValidator.isValidLogin(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void nullAttributesLogin() {
-        User user = new User();
-        assertThat(userValidator.isValidLogin(user)).isFalse();
+        UserLoginRequest userLoginRequest = new UserLoginRequest();
+        assertThat(userValidator.isValidLogin(userLoginRequest)).isFalse();
     }
 
     @Test
     public void nullAttributesRegistration() {
-        User user = new User();
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest();
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void InvalidUsernameMinLogin() {
-        User user = new User("a", "correct pass", false, null, null, null, null);
-        assertThat(userValidator.isValidLogin(user)).isFalse();
+        UserLoginRequest userLoginRequest = new UserLoginRequest("a", "correct pass");
+        assertThat(userValidator.isValidLogin(userLoginRequest)).isFalse();
     }
 
     @Test
     public void InvalidUsernameMinRegistration() {
-        User user = new User("a", "correct pass", false, null, null, null, null);
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("a", "correct pass", "email@gmail.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void InvalidUsernameMaxLogin() {
-        User user = new User("1234567890123456", "correct pass", false, null, null, null, null);
-        assertThat(userValidator.isValidLogin(user)).isFalse();
+        UserLoginRequest userLoginRequest = new UserLoginRequest("1234567890123456", "correct pass");
+        assertThat(userValidator.isValidLogin(userLoginRequest)).isFalse();
     }
 
     @Test
     public void InvalidUsernameMaxRegistration() {
-        User user = new User("1234567890123456", "correct pass", false, null, null, null, null);
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("1234567890123456", "correct pass", "email@gmail.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void InvalidPasswordMinLogin() {
-        User user = new User("correct name", "1234567", false, null, null, null, null);
-        assertThat(userValidator.isValidLogin(user)).isFalse();
+        UserLoginRequest userLoginRequest = new UserLoginRequest("correct name", "1234567");
+        assertThat(userValidator.isValidLogin(userLoginRequest)).isFalse();
     }
 
     @Test
     public void InvalidPasswordMinRegistration() {
-        User user = new User("correct name", "1234567", false, null, null, null, null);
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "1234567", "email@gmail.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void InvalidPasswordMaxLogin() {
-        User user = new User("correct name", "1234567890123456789012345678901", false, null, null, null, null);
-        assertThat(userValidator.isValidLogin(user)).isFalse();
+        UserLoginRequest userLoginRequest = new UserLoginRequest("correct name", "1234567890123456789012345678901");
+        assertThat(userValidator.isValidLogin(userLoginRequest)).isFalse();
     }
 
     @Test
     public void InvalidPasswordMaxRegistration() {
-        User user = new User("correct name", "1234567890123456789012345678901", false, null, null, null, null);
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "1234567890123456789012345678901", "email@gmail.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void InvalidEmailLength() {
-        User user = new User("correct name", "correct pass", false, null, "1234", null, null);
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
-        user.setEmail(
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "123");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
+        userRegistrationRequest.setEmail(
                         "1234567890" +
                         "1234567890" +
                         "1234567890" +
@@ -110,34 +107,34 @@ public class UserValidatorTest {
                         "1234567890" +
                         "1234567890" +
                         "12345");
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void InvalidEmailPattern() {
-        User user = new User("correct name", "correct pass", false, null, null, null, null);
-        user.setEmail("jdfig");
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
-        user.setEmail("email1324.com");
-        assertThat(userValidator.isValidRegistration(user)).isFalse();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "123");
+        userRegistrationRequest.setEmail("jdfig");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
+        userRegistrationRequest.setEmail("email1324.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
     @Test
     public void ValidEmailPattern() {
-        User user = new User("correct name", "correct pass", false, null, null, null, null);
-        user.setEmail("test@yahoo.com");
-        assertThat(userValidator.isValidRegistration(user)).isTrue();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "123");
+        userRegistrationRequest.setEmail("test@yahoo.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isTrue();
     }
 
     @Test
     public void ValidLogin() {
-        User user = new User("correct name", "correct pass", false, null, null, null, null);
-        assertThat(userValidator.isValidLogin(user)).isTrue();
+        UserLoginRequest userLoginRequest = new UserLoginRequest("correct name", "correct pass");
+        assertThat(userValidator.isValidLogin(userLoginRequest)).isTrue();
     }
 
     @Test
     public void ValidRegistration() {
-        User user = new User("correct name", "correct pass", false, null, "test@yahoo.com", null, null);
-        assertThat(userValidator.isValidRegistration(user)).isTrue();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "test@yahoo.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isTrue();
     }
 }

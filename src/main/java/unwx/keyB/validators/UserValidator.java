@@ -5,62 +5,63 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
-import unwx.keyB.domains.User;
+import unwx.keyB.dto.UserLoginRequest;
+import unwx.keyB.dto.UserRegistrationRequest;
 
 @Component
 @PropertySource("classpath:valid.properties")
-public class UserValidator {
+public class UserValidator extends Validator{
 
     @Value("${user.username.minlength}")
-    private Integer usernameMin;
+    private Integer USERNAME_MIN;
 
     @Value("${user.username.maxlength}")
-    private Integer usernameMax;
+    private Integer USERNAME_MAX;
 
     @Value("${user.password.minlength}")
-    private Integer passwordMin;
+    private Integer PASSWORD_MIN;
 
     @Value("${user.password.maxlength}")
-    private Integer passwordMax;
+    private Integer PASSWORD_MAX;
 
     @Value("${user.email.minlength}")
-    private Integer emailMin;
+    private Integer EMAIL_MIN;
 
     @Value("${user.email.maxlength}")
-    private Integer emailMax;
+    private Integer EMAIL_MAX;
 
-    public boolean isValidLogin(@Nullable User user) {
+    public boolean isValidLogin(@Nullable UserLoginRequest user) {
         if (user == null)
             return false;
 
-        if (user.getUsername() == null ||
-                user.getPassword() == null)
-            return false;
-
-        int usernameLen = user.getUsername().length();
-        int passwordLen = user.getPassword().length();
-
-        return usernameLen >= usernameMin && usernameLen <= usernameMax
-                && passwordLen >= passwordMin && passwordLen <= passwordMax;
+        return areAttributesAreNotNull(user.getPassword(), user.getUsername()) &&
+                isValidLengthLogin(user.getUsername().trim().length(), user.getPassword().length());
     }
 
-    public boolean isValidRegistration(@Nullable User user) {
+    public boolean isValidRegistration(@Nullable UserRegistrationRequest user) {
         if (user == null)
             return false;
 
-        if (user.getUsername() == null ||
-                user.getPassword() == null ||
-                user.getEmail() == null)
-            return false;
-
-        int usernameLen = user.getUsername().length();
-        int passwordLen = user.getPassword().length();
-        int emailLen = user.getEmail().length();
         EmailValidator validator = EmailValidator.getInstance();
 
-        return usernameLen >= usernameMin && usernameLen <= usernameMax
-                && passwordLen >= passwordMin && passwordLen <= passwordMax
-                && emailLen >= emailMin && emailLen <= emailMax && validator.isValid(user.getEmail());
+        return areAttributesAreNotNull(user.getPassword(), user.getUsername(), user.getEmail()) &&
+                isValidLengthRegistration(user.getUsername().trim().length(), user.getPassword().length(),
+                        user.getEmail().trim().length(), user.getEmail(), validator);
+    }
+
+    private boolean isValidLengthLogin(int usernameLength, int passwordLength) {
+        return usernameLength >= USERNAME_MIN && usernameLength <= USERNAME_MAX
+                && passwordLength >= PASSWORD_MIN && passwordLength <= PASSWORD_MAX;
+    }
+
+    private boolean isValidLengthRegistration(int usernameLength,
+                                              int passwordLength,
+                                              int emailLength,
+                                              String email,
+                                              EmailValidator validator) {
+        return usernameLength >= USERNAME_MIN && usernameLength <= USERNAME_MAX
+                && passwordLength >= PASSWORD_MIN && passwordLength <= PASSWORD_MAX
+                && emailLength >= EMAIL_MIN && emailLength <= EMAIL_MAX && validator.isValid(email);
     }
 
 }
