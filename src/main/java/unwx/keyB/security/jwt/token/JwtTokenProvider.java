@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component;
 import unwx.keyB.domains.User;
 import unwx.keyB.dto.ClaimsDto;
 import unwx.keyB.security.JwtUserDetailsService;
+import unwx.keyB.security.jwt.JwtAuthenticationException;
 import unwx.keyB.security.jwt.user.JwtUser;
 import unwx.keyB.utils.PemUtils;
 
@@ -59,11 +60,22 @@ public class JwtTokenProvider {
         return null;
     }
 
+    public String resolveToken(String token) {
+        if (token != null && token.startsWith("Bearer_")) {
+            return token.substring(7);
+        }
+        return null;
+    }
+
     public String getUsername(String token) {
-        return JWT.require(algorithm)
-                .withIssuer("key-b")
-                .build()
-                .verify(token).getSubject();
+        try {
+            return JWT.require(algorithm)
+                    .withIssuer("key-b")
+                    .build()
+                    .verify(token).getSubject();
+        }catch (Exception e) {
+            throw new JwtAuthenticationException();
+        }
     }
 
     public Authentication getAuthentication(String token) {

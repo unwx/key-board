@@ -23,6 +23,9 @@ public class User {
     @Column(name = "email")
     private String email;
 
+    @Column(name = "avatar_path")
+    private String avatarPath;
+
     /*
     * if a token is stolen, an attacker can use it forever,
     * so this identifier (token life length) will be checked against the user's current token
@@ -144,6 +147,13 @@ public class User {
         this.refreshToken = refreshToken;
     }
 
+    public String getAvatarPath() {
+        return avatarPath;
+    }
+
+    public void setAvatarPath(String avatarPath) {
+        this.avatarPath = avatarPath;
+    }
 
 
 }

@@ -8,6 +8,7 @@ import org.springframework.web.context.request.WebRequest;
 import unwx.keyB.exceptions.rest.exceptions.BadRequestException;
 import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 import unwx.keyB.exceptions.rest.messages.ErrorMessage;
+import unwx.keyB.security.jwt.JwtAuthenticationException;
 
 import java.util.Date;
 
@@ -34,5 +35,14 @@ public class RestExceptionHandlerController {
                 request.getDescription(false));
     }
 
+    @ExceptionHandler(JwtAuthenticationException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage tokenException(JwtAuthenticationException ex, WebRequest request) {
+        return new ErrorMessage(
+                HttpStatus.FORBIDDEN.value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+    }
 
 }

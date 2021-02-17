@@ -1,6 +1,9 @@
 package unwx.keyB.services;
 
+import org.imgscalr.Scalr;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -8,24 +11,29 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import unwx.keyB.domains.Role;
 import unwx.keyB.domains.User;
-import unwx.keyB.dto.ClaimsDto;
-import unwx.keyB.dto.JwtDto;
-import unwx.keyB.dto.UserLoginRequest;
-import unwx.keyB.dto.UserRegistrationRequest;
+import unwx.keyB.dto.*;
 import unwx.keyB.exceptions.rest.exceptions.BadRequestException;
 import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 import unwx.keyB.repositories.UserRepository;
+import unwx.keyB.security.jwt.JwtAuthenticationException;
 import unwx.keyB.security.jwt.token.JWTokenData;
 import unwx.keyB.security.jwt.token.JwtTokenProvider;
 import unwx.keyB.validators.UserValidator;
 
+import javax.imageio.ImageIO;
 import javax.servlet.ServletRequest;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @Service
+@PropertySource("classpath:files.properties")
 public class UserService {
 
     private final UserRepository userRepository;
@@ -33,6 +41,12 @@ public class UserService {
     private final UserValidator validator;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+
+    @Value("${file.user.upload-dir}")
+    private String userAvatarsDir;
+
+    @Value("${file.user-avatar-default}")
+    private String userDefaultAvatarName;
 
 
     @Autowired
@@ -110,6 +124,21 @@ public class UserService {
         throw new BadRequestException("error during refresh.");
     }
 
+    public ResponseEntity<UserChangeAvatarDto> changeAvatar(String accessToken, MultipartFile avatar) throws IOException, JwtAuthenticationException {
+        String token = jwtTokenProvider.resolveToken(accessToken);
+        if (token != null)  {
+            String username = jwtTokenProvider.getUsername(token);
+            User user = userRepository.findByUsername(username);
+            if (user != null) {
+                String avatarName = avatarProcessAndSave(avatar, user);
+                user.setAvatarPath(avatarName);
+                userRepository.save(user);
+                return new ResponseEntity<>(new UserChangeAvatarDto(avatarName), HttpStatus.OK);
+            }
+        }
+        throw new BadRequestException("user not found.");
+    }
+
     private User register(UserRegistrationRequest userRegistrationRequest) {
 
         User isDuplicate = userRepository.findByUsername(userRegistrationRequest.getUsername());
@@ -134,4 +163,52 @@ public class UserService {
         user.setRefreshToken(refreshTokenData.getToken());
         return user;
     }
+
+    private String avatarProcessAndSave(MultipartFile avatar, User user) throws IOException {
+        if (avatar != null && validator.isFilePicture(avatar)) {
+            String extension = getFileExtension(avatar);
+            if (!extension.isEmpty()) {
+                BufferedImage thumbnail = Scalr.resize(
+                        getImageFromMultipartFile(avatar, extension),
+                        Scalr.Mode.FIT_EXACT,
+                        155);
+                String avatarName = UUID.randomUUID().toString() + "."
+                        + user.getUsername() + "."
+                        + extension;
+
+                String resultPath = userAvatarsDir + avatarName;
+                File result = new File(resultPath);
+                if(result.createNewFile()) {
+                    ImageIO.write(thumbnail, extension, result);
+                    deleteFileAfterAvatarProcess(extension, user);
+                    return avatarName;
+                }
+            }
+        }
+        return userDefaultAvatarName;
+    }
+
+    private BufferedImage getImageFromMultipartFile(MultipartFile file, String extension) throws IOException {
+        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
+        File outputFile = new File("saved." + extension);
+        ImageIO.write(bufferedImage, extension, outputFile);
+        return ImageIO.read(new File("saved." + extension));
+    }
+
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void deleteFileAfterAvatarProcess(String extension, User user) {
+        new File("saved." + extension).delete();
+        String avatarPath = user.getAvatarPath();
+        if (avatarPath != null && !avatarPath.isEmpty()) {
+            new File(userAvatarsDir + avatarPath).delete();
+        }
+    }
+
+    private static String getFileExtension(MultipartFile file) {
+        String fileName = file.getContentType();
+        if (fileName != null && fileName.lastIndexOf("/") != -1 && fileName.lastIndexOf("/") != 0)
+            return fileName.substring(fileName.lastIndexOf("/") + 1);
+        else return "";
+    }
+
 }

@@ -5,6 +5,7 @@ import org.jetbrains.annotations.Nullable;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
 import unwx.keyB.dto.UserLoginRequest;
 import unwx.keyB.dto.UserRegistrationRequest;
 
@@ -47,6 +48,13 @@ public class UserValidator extends Validator{
         return areAttributesAreNotNull(user.getPassword(), user.getUsername(), user.getEmail()) &&
                 isValidLengthRegistration(user.getUsername().trim().length(), user.getPassword().length(),
                         user.getEmail().trim().length(), user.getEmail(), validator);
+    }
+
+    public boolean isFilePicture(MultipartFile file) {
+        String type = file.getContentType();
+        if (type == null)
+            return false;
+        return type.endsWith("png") || type.endsWith("jpg") || type.endsWith("jpeg");
     }
 
     private boolean isValidLengthLogin(int usernameLength, int passwordLength) {
