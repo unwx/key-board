@@ -93,7 +93,13 @@ public class UserService {
                 throw new UsernameNotFoundException("User " + user.getUsername() + " not found.");
             } else {
                 User userWithUpdatedTokens = refreshTokens(userFromDb);
-                return new ResponseEntity<>(userWithUpdatedTokens, HttpStatus.OK);
+                User request = new User.Builder()
+                        .username(userWithUpdatedTokens.getUsername())
+                        .email(userWithUpdatedTokens.getEmail())
+                        .accessToken(userWithUpdatedTokens.getAccessToken())
+                        .refreshToken(userWithUpdatedTokens.getRefreshToken())
+                        .build();
+                return new ResponseEntity<>(request, HttpStatus.OK);
             }
 
         } else throw new BadRequestException("invalid user.");
@@ -102,7 +108,13 @@ public class UserService {
     public ResponseEntity<User> registration(UserRegistrationRequest user) {
         if (validator.isValidRegistration(user)) {
             User createdUser = register(user);
-            return new ResponseEntity<>(createdUser, HttpStatus.OK);
+            User response = new User.Builder()
+                    .username(createdUser.getUsername())
+                    .email(createdUser.getEmail())
+                    .accessToken(createdUser.getAccessToken())
+                    .refreshToken(createdUser.getRefreshToken())
+                    .build();
+            return new ResponseEntity<>(response, HttpStatus.OK);
 
         } else throw new BadRequestException("invalid user.");
     }
@@ -124,7 +136,7 @@ public class UserService {
         throw new BadRequestException("error during refresh.");
     }
 
-    public ResponseEntity<UserChangeAvatarDto> changeAvatar(String accessToken, MultipartFile avatar) throws IOException, JwtAuthenticationException {
+    public ResponseEntity<User> changeAvatar(String accessToken, MultipartFile avatar) throws IOException, JwtAuthenticationException {
         String token = jwtTokenProvider.resolveToken(accessToken);
         if (token != null)  {
             String username = jwtTokenProvider.getUsername(token);
@@ -133,7 +145,7 @@ public class UserService {
                 String avatarName = avatarProcessAndSave(avatar, user);
                 user.setAvatarPath(avatarName);
                 userRepository.save(user);
-                return new ResponseEntity<>(new UserChangeAvatarDto(avatarName), HttpStatus.OK);
+                return new ResponseEntity<>(new User.Builder().avatarPath(avatarName).build(), HttpStatus.OK);
             }
         }
         throw new BadRequestException("user not found.");
@@ -143,13 +155,14 @@ public class UserService {
 
         User isDuplicate = userRepository.findByUsername(userRegistrationRequest.getUsername());
         if (isDuplicate == null) {
-            User user = new User();
-            user.setEmail(userRegistrationRequest.getEmail());
-            user.setPassword(userRegistrationRequest.getPassword());
-            user.setUsername(userRegistrationRequest.getUsername());
-            user.setRoles(Collections.singleton(Role.USER));
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            user.setActive(true);
+            User user = new User.Builder()
+                    .email(userRegistrationRequest.getEmail())
+                    .password(passwordEncoder.encode(userRegistrationRequest.getEmail()))
+                    .username(userRegistrationRequest.getUsername())
+                    .roles(Collections.singleton(Role.USER))
+                    .active(true)
+                    .build();
+
             return userRepository.save(updateUserToken(user));
         } else throw new BadRequestException("User with this username already registered.");
     }

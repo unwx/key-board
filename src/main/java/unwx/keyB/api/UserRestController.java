@@ -1,9 +1,10 @@
 package unwx.keyB.api;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import unwx.keyB.dto.UserChangeAvatarDto;
+import unwx.keyB.domains.User;
 import unwx.keyB.security.jwt.JwtAuthenticationException;
 import unwx.keyB.services.UserService;
 
@@ -11,6 +12,7 @@ import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/user")
+@PreAuthorize("hasAuthority('USER')")
 public class UserRestController {
 
     private final UserService userService;
@@ -46,8 +48,8 @@ public class UserRestController {
      * }
      */
     @PostMapping("/change/avatar")
-    public ResponseEntity<UserChangeAvatarDto> changeAvatar(@RequestHeader(value = "Authorization") String accessToken,
-                                                            @RequestParam MultipartFile avatar) throws IOException, JwtAuthenticationException {
+    public ResponseEntity<User> changeAvatar(@RequestHeader(value = "Authorization") String accessToken,
+                                             @RequestParam MultipartFile avatar) throws IOException, JwtAuthenticationException {
         return userService.changeAvatar(accessToken, avatar);
     }
 }

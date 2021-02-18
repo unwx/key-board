@@ -27,11 +27,11 @@ public class User {
     private String avatarPath;
 
     /*
-    * if a token is stolen, an attacker can use it forever,
-    * so this identifier (token life length) will be checked against the user's current token
-    * so that when a new token is created, the old one is irrelevant,
-    * despite its validity
-    */
+     * if a token is stolen, an attacker can use it forever,
+     * so this identifier (token life length) will be checked against the user's current token
+     * so that when a new token is created, the old one is irrelevant,
+     * despite its validity
+     */
     @Column(name = "access_expiration", length = 30)
     private String accessTokenExpiration;
     @Column(name = "refresh_expiration", length = 30)
@@ -153,6 +153,69 @@ public class User {
 
     public void setAvatarPath(String avatarPath) {
         this.avatarPath = avatarPath;
+    }
+
+    // json view but no magic
+    public static class Builder {
+        private User user;
+
+        public Builder() {
+            user = new User();
+        }
+
+        public Builder username(String username) {
+            user.username = username;
+            return this;
+        }
+
+        public Builder password(String password) {
+            user.password = password;
+            return this;
+        }
+
+        public Builder active(boolean active) {
+            user.active = active;
+            return this;
+        }
+
+        public Builder email(String email) {
+            user.email = email;
+            return this;
+        }
+
+        public Builder avatarPath(String avatarPath) {
+            user.avatarPath = avatarPath;
+            return this;
+        }
+
+        public Builder accessTokenExpiration(String accessTokenExpiration) {
+            user.accessTokenExpiration = accessTokenExpiration;
+            return this;
+        }
+
+        public Builder refreshTokenExpiration(String refreshTokenExpiration) {
+            user.refreshTokenExpiration = refreshTokenExpiration;
+            return this;
+        }
+
+        public Builder accessToken(String accessToken) {
+            user.accessToken = accessToken;
+            return this;
+        }
+
+        public Builder refreshToken(String refreshToken) {
+            user.refreshToken = refreshToken;
+            return this;
+        }
+
+        public Builder roles(Set<Role> roles) {
+            user.roles = roles;
+            return this;
+        }
+
+        public User build() {
+            return user;
+        }
     }
 
 
