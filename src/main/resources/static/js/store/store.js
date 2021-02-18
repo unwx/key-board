@@ -4,6 +4,9 @@ import Vuex from 'vuex'
 import articleApi from "../api/articleApi";
 import authenticationApi from "../api/authenticationApi";
 import cookies from 'vue-cookies'
+import userApi from "../api/userApi";
+
+import base64 from "../methods/base64";
 
 Vue.use(Vuex)
 
@@ -41,18 +44,18 @@ export default new Vuex.Store({
             ]
         },
         loginMutation(state, userWithTokens) {
-            let user = userWithTokens.user;
+            let user = userWithTokens;
             let accessToken = user.accessToken;
             let refreshToken = user.refreshToken;
-            cookies.set('user', {username: user.username, email: user.email}, '1y');
+            cookies.set('user', user, '1y');
             cookies.set('accessToken', accessToken, '1h');
             cookies.set('refreshToken', refreshToken, '1y');
         },
         registrationMutation(state, userWithTokens) {
-            let user = userWithTokens.user;
+            let user = userWithTokens;
             let accessToken = user.accessToken;
             let refreshToken = user.refreshToken;
-            cookies.set('user', {username: user.username, email: user.email}, '1y');
+            cookies.set('user', user, '1y');
             cookies.set('accessToken', accessToken, '1h');
             cookies.set('refreshToken', refreshToken, '1y');
         },
@@ -65,16 +68,16 @@ export default new Vuex.Store({
         async clearErrorsAction({commit}) {
             commit('cleanErrorState')
         },
-        async addArticleAction({commit, state}, article) {
+        async addArticleAction({commit, state, dispatch}, article) {
             let errFlag = false;
             let accessToken = cookies.get("accessToken")
             if (accessToken !== null) {
                 const result = await articleApi.add({article, accessToken}).catch(function (error) {
                     if (error.response) {
                         commit('handleApiError', error.response.data)
-                        if (state.apiError === "Access Denied") {
+                        if (state.apiError.error === "Forbidden") {
                             errFlag = true;
-                            state.refreshTokensAction(commit);
+                            dispatch('refreshTokensAction');
                         }
                     }
                 })
@@ -134,6 +137,27 @@ export default new Vuex.Store({
             } else {
                 commit('handleClientError', 11);
             }
+        },
+        async getUserAction({commit, state, dispatch}) {
+            const user = cookies.get("user");
+            const accessToken = cookies.get("accessToken");
+            if (user !== null) {
+                await userApi.getAvatar(
+                    {avatarName: user.avatar_name, accessToken: accessToken})
+                    .then(response => {
+                        let b64encoded = base64.base64ArrayBuffer(response.data)
+                        user.picture = "data:image/jpg;base64," + b64encoded;
+                    })
+                    .catch(function (error) {
+                        if (error.response) {
+                            commit('handleApiError', error.response.data)
+                            if (state.apiError.error === "Forbidden") {
+                                dispatch('refreshTokensAction');
+                            }
+                        }
+                    })
+            }
+            return user;
         }
     }
 })

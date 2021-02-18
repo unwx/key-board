@@ -48,6 +48,7 @@ public class AuthenticationRestController {
      *      email: string
      *      accessToken: string
      *      refreshToken: string
+     *      avatar_name: string
      *  }
      *
      * (BadRequestException):
@@ -84,6 +85,7 @@ public class AuthenticationRestController {
      *      email: string
      *      accessToken: string
      *      refreshToken: string
+     *      avatar_name: string
      *  }
      *
      * (BadRequestException):

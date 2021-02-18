@@ -9,6 +9,9 @@ import org.springframework.web.multipart.MultipartFile;
 import unwx.keyB.dto.UserLoginRequest;
 import unwx.keyB.dto.UserRegistrationRequest;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 @Component
 @PropertySource("classpath:valid.properties")
 public class UserValidator extends Validator{
@@ -55,6 +58,16 @@ public class UserValidator extends Validator{
         if (type == null)
             return false;
         return type.endsWith("png") || type.endsWith("jpg") || type.endsWith("jpeg");
+    }
+
+    public boolean isAvatarName(String avatarName) {
+        if (avatarName.equals("default-user-picture.png"))
+            return true;
+
+        /* example: 843171f9-f065-407f-927e-dd05e2569a7c.nickname.png or .jpeg or jpg. */
+        Pattern pattern = Pattern.compile("^[0-z]{8}-[0-z]{4}-[0-z]{4}-[0-z]{4}-[0-z]{12}.*.(jpeg|png|jpg)$");
+        Matcher matcher = pattern.matcher(avatarName);
+        return matcher.find();
     }
 
     private boolean isValidLengthLogin(int usernameLength, int passwordLength) {

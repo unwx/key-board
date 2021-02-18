@@ -14,13 +14,19 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import unwx.keyB.domains.Role;
 import unwx.keyB.domains.User;
-import unwx.keyB.dto.*;
+import unwx.keyB.dto.ClaimsDto;
+import unwx.keyB.dto.JwtDto;
+import unwx.keyB.dto.UserLoginRequest;
+import unwx.keyB.dto.UserRegistrationRequest;
 import unwx.keyB.exceptions.rest.exceptions.BadRequestException;
+import unwx.keyB.exceptions.rest.exceptions.InternalException;
 import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 import unwx.keyB.repositories.UserRepository;
 import unwx.keyB.security.jwt.JwtAuthenticationException;
 import unwx.keyB.security.jwt.token.JWTokenData;
 import unwx.keyB.security.jwt.token.JwtTokenProvider;
+import unwx.keyB.utils.FileUtils;
+import unwx.keyB.utils.ImageUtils;
 import unwx.keyB.validators.UserValidator;
 
 import javax.imageio.ImageIO;
@@ -98,6 +104,7 @@ public class UserService {
                         .email(userWithUpdatedTokens.getEmail())
                         .accessToken(userWithUpdatedTokens.getAccessToken())
                         .refreshToken(userWithUpdatedTokens.getRefreshToken())
+                        .avatarName(userWithUpdatedTokens.getAvatarName())
                         .build();
                 return new ResponseEntity<>(request, HttpStatus.OK);
             }
@@ -138,17 +145,28 @@ public class UserService {
 
     public ResponseEntity<User> changeAvatar(String accessToken, MultipartFile avatar) throws IOException, JwtAuthenticationException {
         String token = jwtTokenProvider.resolveToken(accessToken);
-        if (token != null)  {
+        if (token != null) {
             String username = jwtTokenProvider.getUsername(token);
             User user = userRepository.findByUsername(username);
             if (user != null) {
                 String avatarName = avatarProcessAndSave(avatar, user);
-                user.setAvatarPath(avatarName);
+                user.setAvatarName(avatarName);
                 userRepository.save(user);
-                return new ResponseEntity<>(new User.Builder().avatarPath(avatarName).build(), HttpStatus.OK);
+                return new ResponseEntity<>(new User.Builder().avatarName(avatarName).build(), HttpStatus.OK);
             }
         }
         throw new BadRequestException("user not found.");
+    }
+
+    public int[] getAvatar(String avatarName) {
+        if (validator.isAvatarName(avatarName)) {
+            try {
+                return FileUtils.loadFileAsResource(userAvatarsDir + avatarName);
+            } catch (IOException e) {
+                throw new InternalException("IO exception.");
+            }
+        }
+        throw new BadRequestException("not an avatar.");
     }
 
     private User register(UserRegistrationRequest userRegistrationRequest) {
@@ -161,6 +179,7 @@ public class UserService {
                     .username(userRegistrationRequest.getUsername())
                     .roles(Collections.singleton(Role.USER))
                     .active(true)
+                    .avatarName(userDefaultAvatarName)
                     .build();
 
             return userRepository.save(updateUserToken(user));
@@ -179,10 +198,10 @@ public class UserService {
 
     private String avatarProcessAndSave(MultipartFile avatar, User user) throws IOException {
         if (avatar != null && validator.isFilePicture(avatar)) {
-            String extension = getFileExtension(avatar);
+            String extension = FileUtils.getFileExtension(avatar);
             if (!extension.isEmpty()) {
                 BufferedImage thumbnail = Scalr.resize(
-                        getImageFromMultipartFile(avatar, extension),
+                        ImageUtils.getImageFromMultipartFile(avatar, extension),
                         Scalr.Mode.FIT_EXACT,
                         155);
                 String avatarName = UUID.randomUUID().toString() + "."
@@ -191,37 +210,23 @@ public class UserService {
 
                 String resultPath = userAvatarsDir + avatarName;
                 File result = new File(resultPath);
-                if(result.createNewFile()) {
+                if (result.createNewFile()) {
                     ImageIO.write(thumbnail, extension, result);
-                    deleteFileAfterAvatarProcess(extension, user);
+                    ImageUtils.deleteSavedTempFile(extension);
+                    deleteOldAvatarAfterUpdate(user);
                     return avatarName;
                 }
             }
         }
-        return userDefaultAvatarName;
-    }
-
-    private BufferedImage getImageFromMultipartFile(MultipartFile file, String extension) throws IOException {
-        BufferedImage bufferedImage = ImageIO.read(file.getInputStream());
-        File outputFile = new File("saved." + extension);
-        ImageIO.write(bufferedImage, extension, outputFile);
-        return ImageIO.read(new File("saved." + extension));
+        throw new BadRequestException("invalid image.");
     }
 
     @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void deleteFileAfterAvatarProcess(String extension, User user) {
-        new File("saved." + extension).delete();
-        String avatarPath = user.getAvatarPath();
-        if (avatarPath != null && !avatarPath.isEmpty()) {
-            new File(userAvatarsDir + avatarPath).delete();
+    private void deleteOldAvatarAfterUpdate(User user) {
+        String avatarName = user.getAvatarName();
+        if (avatarName != null && !avatarName.isEmpty()) {
+            new File(userAvatarsDir + avatarName).delete();
         }
-    }
-
-    private static String getFileExtension(MultipartFile file) {
-        String fileName = file.getContentType();
-        if (fileName != null && fileName.lastIndexOf("/") != -1 && fileName.lastIndexOf("/") != 0)
-            return fileName.substring(fileName.lastIndexOf("/") + 1);
-        else return "";
     }
 
 }

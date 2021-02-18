@@ -36,7 +36,7 @@ public class UserRestController {
      * @response
      * (OK):
      * Response {
-     *  avatarName: string
+     *  avatar_name: string
      * }
      *
      * (BadRequestException):
@@ -52,4 +52,10 @@ public class UserRestController {
                                              @RequestParam MultipartFile avatar) throws IOException, JwtAuthenticationException {
         return userService.changeAvatar(accessToken, avatar);
     }
+
+    @GetMapping(value = "/avatar/{avatar_name}")
+    public int[] getAvatar(@PathVariable("avatar_name") String avatarName) {
+        return userService.getAvatar(avatarName);
+    }
+
 }

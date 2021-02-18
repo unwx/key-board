@@ -18,7 +18,7 @@
           Sign in
         </v-btn>
       </div>
-      <div v-else class="text-title" @click="goHome">Profile</div>
+      <div v-else class="text-title" @click="goProfile">Profile</div>
     </v-app-bar>
   </div>
 </template>
@@ -45,6 +45,12 @@ export default {
         this.$router.push(signInPath);
       }
     },
+    goProfile() {
+      const profilePath = '/profile';
+      if (this.$route.path !== profilePath) {
+        this.$router.push(profilePath);
+      }
+    }
   },
   beforeCreate() {
       const user = cookies.get("user");

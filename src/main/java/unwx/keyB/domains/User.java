@@ -1,5 +1,7 @@
 package unwx.keyB.domains;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import javax.persistence.*;
 import java.util.Set;
 
@@ -23,8 +25,9 @@ public class User {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "avatar_path")
-    private String avatarPath;
+    @Column(name = "avatar_name")
+    @JsonProperty("avatar_name")
+    private String avatarName;
 
     /*
      * if a token is stolen, an attacker can use it forever,
@@ -147,17 +150,17 @@ public class User {
         this.refreshToken = refreshToken;
     }
 
-    public String getAvatarPath() {
-        return avatarPath;
+    public String getAvatarName() {
+        return avatarName;
     }
 
-    public void setAvatarPath(String avatarPath) {
-        this.avatarPath = avatarPath;
+    public void setAvatarName(String avatarName) {
+        this.avatarName = avatarName;
     }
 
     // json view but no magic
     public static class Builder {
-        private User user;
+        private final User user;
 
         public Builder() {
             user = new User();
@@ -183,8 +186,8 @@ public class User {
             return this;
         }
 
-        public Builder avatarPath(String avatarPath) {
-            user.avatarPath = avatarPath;
+        public Builder avatarName(String avatarName) {
+            user.avatarName = avatarName;
             return this;
         }
 
