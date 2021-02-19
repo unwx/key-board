@@ -122,15 +122,18 @@ export default new Vuex.Store({
         async refreshTokensAction({commit}) {
             let errFlag = false;
             let refreshToken = cookies.get("refreshToken")
+            console.log(refreshToken)
             if (refreshToken !== null) {
                 const result = await authenticationApi.refresh(refreshToken).catch(function (error) {
                     if (error.response) {
                         commit('handleClientError', 11);
                         errFlag = true;
+                        console.log(error.response)
                     }
                 })
 
                 if (!errFlag) {
+                    console.log("no error")
                     const data = await result.data;
                     commit('refreshTokensMutation', data);
                 }
@@ -158,6 +161,23 @@ export default new Vuex.Store({
                     })
             }
             return user;
+        },
+        async uploadAvatarAction({}, file) {
+            let formData = new FormData();
+            formData.append('avatar', file);
+            const accessToken = cookies.get("accessToken");
+            if (accessToken !== null) {
+                userApi.uploadAvatar({avatar: formData, accessToken: accessToken})
+                    .then(response =>
+                        userApi.getAvatar({avatar_name: response.avatar_name})
+                            .then(response => {
+                                let b64encoded = base64.base64ArrayBuffer(response.data)
+                                let user = cookies.get("user")
+                                user.picture = "data:image/jpg;base64," + b64encoded;
+                                return user;
+                            }).catch(function (error) {})
+                    )
+            }
         }
     }
 })

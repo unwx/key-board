@@ -11,7 +11,7 @@ export default {
         throw error
     }),
     refresh: refreshToken => axios.post(apiURI + "/refresh", {},
-        {headers: {refreshToken:"Bearer_" + refreshToken}}
+        {headers: {Authorization:"Bearer_" + refreshToken}}
         ).catch(function (error) {
         throw error
     }),

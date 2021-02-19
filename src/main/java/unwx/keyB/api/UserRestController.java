@@ -53,8 +53,31 @@ public class UserRestController {
         return userService.changeAvatar(accessToken, avatar);
     }
 
+    /**
+     * @uri
+     * /api/user/avatar/{avatar_name}
+     *
+     * @method
+     * get
+     *
+     * @request
+     * header: accessToken (Authorization:accessToken)
+     * path_variable: avatarName
+     *
+     * @response
+     * (OK):
+     * Response: int[] {-1, -40, -1, -32, 0, 74...}
+     *
+     * (BadRequestException | InternalException):
+     * ErrorMessage {
+     *      statusCode: int
+     *      timestamp: string
+     *      message: string
+     *      description: string
+     * }
+     */
     @GetMapping(value = "/avatar/{avatar_name}")
-    public int[] getAvatar(@PathVariable("avatar_name") String avatarName) {
+    public ResponseEntity<int[]> getAvatar(@PathVariable("avatar_name") String avatarName) {
         return userService.getAvatar(avatarName);
     }
 

@@ -158,10 +158,11 @@ public class UserService {
         throw new BadRequestException("user not found.");
     }
 
-    public int[] getAvatar(String avatarName) {
+    public ResponseEntity<int[]> getAvatar(String avatarName) {
         if (validator.isAvatarName(avatarName)) {
             try {
-                return FileUtils.loadFileAsResource(userAvatarsDir + avatarName);
+                return new ResponseEntity<>(FileUtils.loadFileAsResource(userAvatarsDir + avatarName),
+                        HttpStatus.OK);
             } catch (IOException e) {
                 throw new InternalException("IO exception.");
             }

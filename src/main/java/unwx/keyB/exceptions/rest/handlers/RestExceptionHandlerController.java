@@ -1,6 +1,9 @@
 package unwx.keyB.exceptions.rest.handlers;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -55,5 +58,35 @@ public class RestExceptionHandlerController {
                 ex.getMessage(),
                 request.getDescription(false));
     }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage badCredentialsException(BadCredentialsException ex, WebRequest request) {
+        return new ErrorMessage(
+                HttpStatus.FORBIDDEN.value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ErrorMessage accessDeniedException(BadCredentialsException ex, WebRequest request) {
+        return new ErrorMessage(
+                HttpStatus.FORBIDDEN.value(),
+                new Date(),
+                ex.getMessage(),
+                request.getDescription(false));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Object> handle(Exception ex) {
+        if (ex instanceof NullPointerException) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
+
+
 
 }
