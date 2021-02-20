@@ -2,8 +2,8 @@ package unwx.keyB.dto;
 
 public class JwtDto {
 
-    private String accessToken;
-    private String refreshToken;
+    private final String accessToken;
+    private final String refreshToken;
 
     public JwtDto(String accessToken, String refreshToken) {
         this.accessToken = accessToken;
@@ -14,15 +14,7 @@ public class JwtDto {
         return accessToken;
     }
 
-    public void setAccessToken(String accessToken) {
-        this.accessToken = accessToken;
-    }
-
     public String getRefreshToken() {
         return refreshToken;
-    }
-
-    public void setRefreshToken(String refreshToken) {
-        this.refreshToken = refreshToken;
     }
 }

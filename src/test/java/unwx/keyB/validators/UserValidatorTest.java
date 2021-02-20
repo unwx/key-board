@@ -37,13 +37,13 @@ public class UserValidatorTest {
 
     @Test
     public void nullAttributesLogin() {
-        UserLoginRequest userLoginRequest = new UserLoginRequest();
+        UserLoginRequest userLoginRequest = new UserLoginRequest(null, null);
         assertThat(userValidator.isValidLogin(userLoginRequest)).isFalse();
     }
 
     @Test
     public void nullAttributesRegistration() {
-        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest();
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest(null, null, null);
         assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
     }
 
@@ -99,30 +99,27 @@ public class UserValidatorTest {
     public void InvalidEmailLength() {
         UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "123");
         assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
-        userRegistrationRequest.setEmail(
-                        "1234567890" +
-                        "1234567890" +
-                        "1234567890" +
-                        "1234567890" +
-                        "1234567890" +
-                        "1234567890" +
-                        "12345");
-        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
+        UserRegistrationRequest userRegistrationRequest1 = new UserRegistrationRequest("correct name", "correct pass", "1234567890" +
+                "1234567890" +
+                "1234567890" +
+                "1234567890" +
+                "1234567890" +
+                "1234567890" +
+                "12345");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest1)).isFalse();
     }
 
     @Test
     public void InvalidEmailPattern() {
-        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "123");
-        userRegistrationRequest.setEmail("jdfig");
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "jdfig");
         assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
-        userRegistrationRequest.setEmail("email1324.com");
-        assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isFalse();
+        UserRegistrationRequest userRegistrationRequest1 = new UserRegistrationRequest("correct name", "correct pass", "email1324.com");
+        assertThat(userValidator.isValidRegistration(userRegistrationRequest1)).isFalse();
     }
 
     @Test
     public void ValidEmailPattern() {
-        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "123");
-        userRegistrationRequest.setEmail("test@yahoo.com");
+        UserRegistrationRequest userRegistrationRequest = new UserRegistrationRequest("correct name", "correct pass", "test@yahoo.com");
         assertThat(userValidator.isValidRegistration(userRegistrationRequest)).isTrue();
     }
 

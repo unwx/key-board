@@ -7,6 +7,7 @@ import java.util.Set;
 
 @Entity
 @Table
+@SuppressWarnings("unused")
 public class User {
 
     @Id
@@ -50,13 +51,21 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Set<Role> roles;
 
+    @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Comment> comments;
+
+    @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Article> articles;
+
     public User(String username,
                 String password,
                 boolean active,
                 Set<Role> roles,
                 String email,
                 String accessTokenExpiration,
-                String refreshTokenExpiration) {
+                String refreshTokenExpiration,
+                Set<Comment> comments,
+                Set<Article> articles) {
         this.username = username;
         this.password = password;
         this.active = active;
@@ -64,6 +73,8 @@ public class User {
         this.email = email;
         this.accessTokenExpiration = accessTokenExpiration;
         this.refreshTokenExpiration = refreshTokenExpiration;
+        this.comments = comments;
+        this.articles = articles;
     }
 
     public User() {
@@ -158,6 +169,22 @@ public class User {
         this.avatarName = avatarName;
     }
 
+    public Set<Comment> getComments() {
+        return comments;
+    }
+
+    public void setComments(Set<Comment> comments) {
+        this.comments = comments;
+    }
+
+    public Set<Article> getArticles() {
+        return articles;
+    }
+
+    public void setArticles(Set<Article> articles) {
+        this.articles = articles;
+    }
+
     // json view but no magic
     public static class Builder {
         private final User user;
@@ -216,10 +243,18 @@ public class User {
             return this;
         }
 
+        public Builder comments(Set<Comment> comments) {
+            user.comments = comments;
+            return this;
+        }
+
+        public Builder articles(Set<Article> articles) {
+            user.articles = articles;
+            return this;
+        }
+
         public User build() {
             return user;
         }
     }
-
-
 }

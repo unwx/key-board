@@ -3,7 +3,6 @@ package unwx.keyB.validators;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import unwx.keyB.domains.Article;
 import unwx.keyB.dto.ArticleCreateRequest;
 import unwx.keyB.dto.ArticleEditRequest;
 
@@ -36,78 +35,69 @@ public class ArticleValidatorTest {
 
     @Test
     public void nullAttributes() {
-        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest();
-        ArticleEditRequest articleEditRequest = new ArticleEditRequest();
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(null, null);
+        ArticleEditRequest articleEditRequest = new ArticleEditRequest(null, null, -1L);
         assertThat(articleValidator.isValidToCreate(articleCreateRequest)).isFalse();
         assertThat(articleValidator.isValidToEdit(articleEditRequest)).isFalse();
     }
 
     @Test
     public void InvalidTitleMinCreate() {
-        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("this is correct text...", null);
-        articleCreateRequest.setTitle("");
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("this is correct text...", "");
         assertThat(articleValidator.isValidToCreate(articleCreateRequest)).isFalse();
-        articleCreateRequest.setTitle("1234");
-        assertThat(articleValidator.isValidToCreate(articleCreateRequest)).isFalse();
+        ArticleCreateRequest articleCreateRequest1 = new ArticleCreateRequest("this is correct text...", "1234");
+        assertThat(articleValidator.isValidToCreate(articleCreateRequest1)).isFalse();
     }
 
     @Test
     public void InvalidTitleMinEdit() {
-        ArticleEditRequest articleEditRequest = new ArticleEditRequest("this is correct text...", null, 1L);
-        articleEditRequest.setTitle("");
+        ArticleEditRequest articleEditRequest = new ArticleEditRequest("this is correct text...", "", 1L);
         assertThat(articleValidator.isValidToEdit(articleEditRequest)).isFalse();
-        articleEditRequest.setTitle("1234");
-        assertThat(articleValidator.isValidToEdit(articleEditRequest)).isFalse();
+        ArticleEditRequest articleEditRequest1 = new ArticleEditRequest("this is correct text...", "1234", 1L);
+        assertThat(articleValidator.isValidToEdit(articleEditRequest1)).isFalse();
     }
 
     @Test
     public void InvalidTitleMaxCreate() {
-        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("this is correct text...", null);
-        articleCreateRequest.setTitle("1234567890123456789012345678901");
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("this is correct text...", "1234567890123456789012345678901");
         assertThat(articleValidator.isValidToCreate(articleCreateRequest)).isFalse();
     }
 
     @Test
     public void InvalidTitleMaxEdit() {
-        ArticleEditRequest articleEditRequest = new ArticleEditRequest("this is correct text...", null, 1L);
-        articleEditRequest.setTitle("1234567890123456789012345678901");
+        ArticleEditRequest articleEditRequest = new ArticleEditRequest("this is correct text...", "1234567890123456789012345678901", 1L);
         assertThat(articleValidator.isValidToEdit(articleEditRequest)).isFalse();
     }
 
     @Test
     public void InvalidTextMinCreate() {
-        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(null, "this is correct");
-        Article article = new Article("this is correct", null, null, null);
-        article.setText("qwerty");
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest("qwerty", "this is correct");
         assertThat(articleValidator.isValidToCreate(articleCreateRequest)).isFalse();
     }
 
     @Test
     public void InvalidTextMinEdit() {
-        ArticleEditRequest articleEditRequest = new ArticleEditRequest(null, "this is correct", 1L);
-        articleEditRequest.setText("qwerty");
+        ArticleEditRequest articleEditRequest = new ArticleEditRequest("qwerty", "this is correct", 1L);
         assertThat(articleValidator.isValidToEdit(articleEditRequest)).isFalse();
     }
 
     @Test
     public void InvalidTextMaxCreate() {
-        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(null, "this is correct");
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 5100; i++) {
             sb.append(i);
         }
-        articleCreateRequest.setText(sb.toString());
+        ArticleCreateRequest articleCreateRequest = new ArticleCreateRequest(sb.toString(), "this is correct");
         assertThat(articleValidator.isValidToCreate(articleCreateRequest)).isFalse();
     }
 
     @Test
     public void InvalidTextMaxEdit() {
-        ArticleEditRequest articleEditRequest = new ArticleEditRequest(null, "this is correct", 1L);
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 5100; i++) {
             sb.append(i);
         }
-        articleEditRequest.setText(sb.toString());
+        ArticleEditRequest articleEditRequest = new ArticleEditRequest(sb.toString(), "this is correct", 1L);
         assertThat(articleValidator.isValidToEdit(articleEditRequest)).isFalse();
     }
 

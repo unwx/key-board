@@ -126,8 +126,9 @@ public class ArticleRestController {
      * }
      */
     @PostMapping()
-    public ResponseEntity<Article> create(@RequestBody ArticleCreateRequest article){
-        return articleService.createArticle(article);
+    public ResponseEntity<Article> create(@RequestBody ArticleCreateRequest article,
+                                          @RequestHeader("Authorization") String accessToken){
+        return articleService.createArticle(article, accessToken);
     }
 
     /**
@@ -147,8 +148,9 @@ public class ArticleRestController {
      * @response
      */
     @PutMapping()
-    public ResponseEntity<Article> edit(@RequestBody ArticleEditRequest article) {
-        return articleService.editArticle(article);
+    public ResponseEntity<Article> edit(@RequestBody ArticleEditRequest article,
+                                        @RequestHeader("Authorization") String accessToken) {
+        return articleService.editArticle(article, accessToken);
     }
 
     /**
@@ -165,8 +167,9 @@ public class ArticleRestController {
      * httpStatus: httpStatus
      */
     @DeleteMapping("{id}")
-    public HttpStatus delete(@PathVariable("id") Article article){
-        return articleService.delete(article);
+    public HttpStatus delete(@PathVariable("id") long id,
+                             @RequestHeader("Authorization") String accessToken){
+        return articleService.delete(id, accessToken);
     }
 
 }

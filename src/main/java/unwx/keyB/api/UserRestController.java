@@ -13,6 +13,10 @@ import java.io.IOException;
 @RestController
 @RequestMapping("/api/user")
 @PreAuthorize("hasAuthority('USER')")
+/*
+   access token required.
+   headers: {Authorization:Bearer_{access token}}
+ */
 public class UserRestController {
 
     private final UserService userService;

@@ -38,8 +38,13 @@ public class UserValidator extends Validator{
         if (user == null)
             return false;
 
-        return areAttributesAreNotNull(user.getPassword(), user.getUsername()) &&
-                isValidLengthLogin(user.getUsername().trim().length(), user.getPassword().length());
+        return areAttributesAreNotNull(
+                user.getPassword(),
+                user.getUsername()) &&
+
+                isValidLengthLogin(
+                        user.getUsername().trim().length(),
+                        user.getPassword().length());
     }
 
     public boolean isValidRegistration(@Nullable UserRegistrationRequest user) {
@@ -48,8 +53,14 @@ public class UserValidator extends Validator{
 
         EmailValidator validator = EmailValidator.getInstance();
 
-        return areAttributesAreNotNull(user.getPassword(), user.getUsername(), user.getEmail()) &&
-                isValidLengthRegistration(user.getUsername().trim().length(), user.getPassword().length(),
+        return areAttributesAreNotNull(
+                user.getPassword(),
+                user.getUsername(),
+                user.getEmail()) &&
+
+                isValidLengthRegistration(
+                        user.getUsername().trim().length(),
+                        user.getPassword().length(),
                         user.getEmail().trim().length(), user.getEmail(), validator);
     }
 

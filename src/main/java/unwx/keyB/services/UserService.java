@@ -8,7 +8,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +19,6 @@ import unwx.keyB.dto.UserLoginRequest;
 import unwx.keyB.dto.UserRegistrationRequest;
 import unwx.keyB.exceptions.rest.exceptions.BadRequestException;
 import unwx.keyB.exceptions.rest.exceptions.InternalException;
-import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 import unwx.keyB.repositories.UserRepository;
 import unwx.keyB.security.jwt.JwtAuthenticationException;
 import unwx.keyB.security.jwt.token.JWTokenData;
@@ -72,78 +70,81 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
-    }
-
-    public User findById(Long id) {
-        return userRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("not found"));
-    }
-
-    public void delete(User user) {
-        userRepository.delete(user);
-    }
-
     public User refreshTokens(User user) {
         return userRepository.save(updateUserToken(user));
     }
 
     public ResponseEntity<User> login(UserLoginRequest user) {
+        return new ResponseEntity<>(loginProcess(user), HttpStatus.OK);
+    }
+
+    public ResponseEntity<User> registration(UserRegistrationRequest user) {
+        return new ResponseEntity<>(registrationProcess(user), HttpStatus.OK);
+    }
+
+    public ResponseEntity<JwtDto> refreshTokens(ServletRequest requestWithRefreshToken) {
+        return new ResponseEntity<>(refreshTokensProcess(requestWithRefreshToken), HttpStatus.OK);
+    }
+
+    public ResponseEntity<User> changeAvatar(String accessToken, MultipartFile avatar) throws IOException, JwtAuthenticationException {
+        return new ResponseEntity<>(changeAvatarProcess(accessToken, avatar), HttpStatus.OK);
+    }
+
+    private User loginProcess(UserLoginRequest user) {
         if (validator.isValidLogin(user)) {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            user.getUsername(), user.getPassword()));
+            authenticate(new User.Builder()
+                    .username(user.getUsername())
+                    .password(user.getPassword())
+                    .build());
 
             User userFromDb = userRepository.findByUsername(user.getUsername());
-            if (userFromDb == null) {
-                throw new UsernameNotFoundException("User " + user.getUsername() + " not found.");
-            } else {
+            if (userFromDb != null) {
                 User userWithUpdatedTokens = refreshTokens(userFromDb);
-                User request = new User.Builder()
+                return new User.Builder()
                         .username(userWithUpdatedTokens.getUsername())
                         .email(userWithUpdatedTokens.getEmail())
                         .accessToken(userWithUpdatedTokens.getAccessToken())
                         .refreshToken(userWithUpdatedTokens.getRefreshToken())
                         .avatarName(userWithUpdatedTokens.getAvatarName())
                         .build();
-                return new ResponseEntity<>(request, HttpStatus.OK);
             }
-
-        } else throw new BadRequestException("invalid user.");
+        }
+        throw new BadRequestException("invalid user.");
     }
 
-    public ResponseEntity<User> registration(UserRegistrationRequest user) {
+    private User registrationProcess(UserRegistrationRequest user) {
         if (validator.isValidRegistration(user)) {
             User createdUser = register(user);
-            User response = new User.Builder()
+            return new User.Builder()
                     .username(createdUser.getUsername())
                     .email(createdUser.getEmail())
                     .accessToken(createdUser.getAccessToken())
                     .refreshToken(createdUser.getRefreshToken())
                     .build();
-            return new ResponseEntity<>(response, HttpStatus.OK);
 
         } else throw new BadRequestException("invalid user.");
     }
 
-    public ResponseEntity<JwtDto> refreshTokens(ServletRequest requestWithRefreshToken) {
+    private JwtDto refreshTokensProcess(ServletRequest requestWithRefreshToken) {
         ClaimsDto claims = (ClaimsDto) requestWithRefreshToken.getAttribute("claims");
         if (claims != null) {
             User user = userRepository.findByUsername(claims.getClaims().get("sub").asString());
             if (user != null) {
                 User userWithUpdatedTokens = updateUserToken(user);
 
-                JwtDto tokens = new JwtDto(
+                return new JwtDto(
                         userWithUpdatedTokens.getAccessToken(),
                         userWithUpdatedTokens.getRefreshToken());
-
-                return new ResponseEntity<>(tokens, HttpStatus.OK);
             }
         }
         throw new BadRequestException("error during refresh.");
     }
 
-    public ResponseEntity<User> changeAvatar(String accessToken, MultipartFile avatar) throws IOException, JwtAuthenticationException {
+    public ResponseEntity<int[]> getAvatar(String avatarName) {
+        return new ResponseEntity<>(getAvatarProcess(avatarName), HttpStatus.OK);
+    }
+
+    private User changeAvatarProcess(String accessToken, MultipartFile avatar) throws IOException {
         String token = jwtTokenProvider.resolveToken(accessToken);
         if (token != null) {
             String username = jwtTokenProvider.getUsername(token);
@@ -152,17 +153,16 @@ public class UserService {
                 String avatarName = avatarProcessAndSave(avatar, user);
                 user.setAvatarName(avatarName);
                 userRepository.save(user);
-                return new ResponseEntity<>(new User.Builder().avatarName(avatarName).build(), HttpStatus.OK);
+                return new User.Builder().avatarName(avatarName).build();
             }
         }
         throw new BadRequestException("user not found.");
     }
 
-    public ResponseEntity<int[]> getAvatar(String avatarName) {
+    private int[] getAvatarProcess(String avatarName) {
         if (validator.isAvatarName(avatarName)) {
             try {
-                return new ResponseEntity<>(FileUtils.loadFileAsResource(userAvatarsDir + avatarName),
-                        HttpStatus.OK);
+                return FileUtils.loadFileAsResource(userAvatarsDir + avatarName);
             } catch (IOException e) {
                 throw new InternalException("IO exception.");
             }
@@ -171,7 +171,6 @@ public class UserService {
     }
 
     private User register(UserRegistrationRequest userRegistrationRequest) {
-
         User isDuplicate = userRepository.findByUsername(userRegistrationRequest.getUsername());
         if (isDuplicate == null) {
             User user = new User.Builder()
@@ -182,7 +181,7 @@ public class UserService {
                     .active(true)
                     .avatarName(userDefaultAvatarName)
                     .build();
-
+            authenticate(user);
             return userRepository.save(updateUserToken(user));
         } else throw new BadRequestException("User with this username already registered.");
     }
@@ -228,6 +227,12 @@ public class UserService {
         if (avatarName != null && !avatarName.isEmpty()) {
             new File(userAvatarsDir + avatarName).delete();
         }
+    }
+
+    private void authenticate(User user) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        user.getUsername(), user.getPassword()));
     }
 
 }

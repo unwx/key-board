@@ -27,17 +27,29 @@ public class ArticleValidator extends Validator{
         if (t == null)
             return false;
 
-        return areAttributesAreNotNull(t.getText(), t.getTitle()) &&
-                isLengthValid(t.getText().trim().length(), t.getTitle().trim().length());
+        return areAttributesAreNotNull(
+                t.getText(),
+                t.getTitle()) &&
+
+                isLengthValid(
+                        t.getText().trim().length(),
+                        t.getTitle().trim().length());
     }
 
     public boolean isValidToEdit(@Nullable ArticleEditRequest t) {
         if (t == null)
             return false;
 
-        long id = t.getTargetId();
-        return areAttributesAreNotNull(id, t.getText(), t.getTitle()) &&
-                isLengthValid(t.getText().trim().length(), t.getTitle().trim().length());
+        return areAttributesAreNotNull(
+                t.getTargetId(),
+                t.getText(),
+                t.getTitle()) &&
+
+                isLengthValid(
+                        t.getText().trim().length(),
+                        t.getTitle().trim().length()) &&
+
+                t.getTargetId() > -1;
     }
 
     private boolean isLengthValid(int textLength, int titleLength) {
