@@ -11,6 +11,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import unwx.keyB.dao.UserDao;
+import unwx.keyB.dao.entities.SaveType;
+import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.domains.Role;
 import unwx.keyB.domains.User;
 import unwx.keyB.dto.ClaimsDto;
@@ -19,7 +22,6 @@ import unwx.keyB.dto.UserLoginRequest;
 import unwx.keyB.dto.UserRegistrationRequest;
 import unwx.keyB.exceptions.rest.exceptions.BadRequestException;
 import unwx.keyB.exceptions.rest.exceptions.InternalException;
-import unwx.keyB.repositories.UserRepository;
 import unwx.keyB.security.jwt.JwtAuthenticationException;
 import unwx.keyB.security.jwt.token.JWTokenData;
 import unwx.keyB.security.jwt.token.JwtTokenProvider;
@@ -40,11 +42,11 @@ import java.util.UUID;
 @PropertySource("classpath:files.properties")
 public class UserService {
 
-    private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final UserValidator validator;
     private final AuthenticationManager authenticationManager;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final JwtTokenProvider tokenProvider;
+    private final UserDao userDao = new UserDao();
 
     @Value("${file.user.upload-dir}")
     private String userAvatarsDir;
@@ -54,24 +56,18 @@ public class UserService {
 
 
     @Autowired
-    public UserService(UserRepository userRepository,
-                       BCryptPasswordEncoder passwordEncoder,
+    public UserService(BCryptPasswordEncoder passwordEncoder,
                        UserValidator validator,
                        AuthenticationManager authenticationManager,
                        JwtTokenProvider jwtTokenProvider) {
-        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.validator = validator;
         this.authenticationManager = authenticationManager;
-        this.jwtTokenProvider = jwtTokenProvider;
+        this.tokenProvider = jwtTokenProvider;
     }
 
-    public List<User> getAll() {
-        return userRepository.findAll();
-    }
-
-    public User refreshTokens(User user) {
-        return userRepository.save(updateUserToken(user));
+    public List<User> get(int start, short limit) {
+        return userDao.readManyLazy(getUserSqlColumnsDefault(), "`id` > " + start, limit);
     }
 
     public ResponseEntity<User> login(UserLoginRequest user) {
@@ -97,38 +93,46 @@ public class UserService {
                     .password(user.getPassword())
                     .build());
 
-            User userFromDb = userRepository.findByUsername(user.getUsername());
-            if (userFromDb != null) {
-                User userWithUpdatedTokens = refreshTokens(userFromDb);
-                return new User.Builder()
-                        .username(userWithUpdatedTokens.getUsername())
-                        .email(userWithUpdatedTokens.getEmail())
-                        .accessToken(userWithUpdatedTokens.getAccessToken())
-                        .refreshToken(userWithUpdatedTokens.getRefreshToken())
-                        .avatarName(userWithUpdatedTokens.getAvatarName())
-                        .build();
-            }
+            User toUpdate = new User.Builder()
+                    .username(user.getUsername())
+                    .build();
+            User userWithUpdatedTokens = updateUserToken(toUpdate);
+            userDao.save(userWithUpdatedTokens, SaveType.UPDATE);
+            User response = userDao.readLazy(
+                    getUserSqlColumnsDefault(),
+                    new SqlField(user.getUsername(), "username"));
+            response.setRefreshToken(userWithUpdatedTokens.getRefreshToken());
+            response.setAccessToken(userWithUpdatedTokens.getAccessToken());
+            return response;
         }
         throw new BadRequestException("invalid user.");
     }
 
-    private User registrationProcess(UserRegistrationRequest user) {
-        if (validator.isValidRegistration(user)) {
-            User createdUser = register(user);
-            return new User.Builder()
-                    .username(createdUser.getUsername())
-                    .email(createdUser.getEmail())
-                    .accessToken(createdUser.getAccessToken())
-                    .refreshToken(createdUser.getRefreshToken())
+    private User registrationProcess(UserRegistrationRequest request) {
+        if (validator.isValidRegistration(request) && isDuplicateUsername(request)) {
+            User toCreate = new User.Builder()
+                    .username(request.getUsername())
+                    .email(request.getEmail())
+                    .password(passwordEncoder.encode(request.getPassword()))
+                    .roles(Collections.singletonList(Role.USER))
+                    .avatarName(userDefaultAvatarName)
+                    .active(true)
                     .build();
 
+            Long createdId = userDao.save(toCreate, SaveType.CREATE);
+            return userDao.readLazy(
+                    getUserSqlColumnsDefault(),
+                    new SqlField(createdId, "id"));
         } else throw new BadRequestException("invalid user.");
     }
 
     private JwtDto refreshTokensProcess(ServletRequest requestWithRefreshToken) {
         ClaimsDto claims = (ClaimsDto) requestWithRefreshToken.getAttribute("claims");
         if (claims != null) {
-            User user = userRepository.findByUsername(claims.getClaims().get("sub").asString());
+            User user = userDao.readLazy(
+                    Collections.singletonList("username"),
+                    new SqlField(claims.getClaims().get("sub").asString(), "username"));
+
             if (user != null) {
                 User userWithUpdatedTokens = updateUserToken(user);
 
@@ -145,16 +149,19 @@ public class UserService {
     }
 
     private User changeAvatarProcess(String accessToken, MultipartFile avatar) throws IOException {
-        String token = jwtTokenProvider.resolveToken(accessToken);
-        if (token != null) {
-            String username = jwtTokenProvider.getUsername(token);
-            User user = userRepository.findByUsername(username);
-            if (user != null) {
-                String avatarName = avatarProcessAndSave(avatar, user);
-                user.setAvatarName(avatarName);
-                userRepository.save(user);
-                return new User.Builder().avatarName(avatarName).build();
-            }
+        String cleanToken = tokenProvider.resolveToken(accessToken);
+        String username = tokenProvider.getUsername(cleanToken);
+        User user = userDao.readLazy(
+                Collections.singletonList("id"),
+                new SqlField(username, "username"));
+
+        if (user != null) {
+            String avatarName = avatarProcessAndSave(avatar, user);
+            user.setAvatarName(avatarName);
+            userDao.save(user, SaveType.UPDATE);
+            return new User.Builder()
+                    .avatarName(avatarName)
+                    .build();
         }
         throw new BadRequestException("user not found.");
     }
@@ -170,25 +177,16 @@ public class UserService {
         throw new BadRequestException("not an avatar.");
     }
 
-    private User register(UserRegistrationRequest userRegistrationRequest) {
-        User isDuplicate = userRepository.findByUsername(userRegistrationRequest.getUsername());
-        if (isDuplicate == null) {
-            User user = new User.Builder()
-                    .email(userRegistrationRequest.getEmail())
-                    .password(passwordEncoder.encode(userRegistrationRequest.getEmail()))
-                    .username(userRegistrationRequest.getUsername())
-                    .roles(Collections.singleton(Role.USER))
-                    .active(true)
-                    .avatarName(userDefaultAvatarName)
-                    .build();
-            authenticate(user);
-            return userRepository.save(updateUserToken(user));
-        } else throw new BadRequestException("User with this username already registered.");
+    private boolean isDuplicateUsername(UserRegistrationRequest userRegistrationRequest) {
+        User u = userDao.readLazy(
+                Collections.singletonList("username"),
+                new SqlField(userRegistrationRequest.getUsername(), "username"));
+        return u != null;
     }
 
     private User updateUserToken(User user) {
-        JWTokenData accessTokenData = jwtTokenProvider.createAccess(user);
-        JWTokenData refreshTokenData = jwtTokenProvider.createRefresh(user);
+        JWTokenData accessTokenData = tokenProvider.createAccess(user);
+        JWTokenData refreshTokenData = tokenProvider.createRefresh(user);
         user.setAccessTokenExpiration(String.valueOf(accessTokenData.getExpirationAtMillis()));
         user.setRefreshTokenExpiration(String.valueOf(refreshTokenData.getExpirationAtMillis()));
         user.setAccessToken(accessTokenData.getToken());
@@ -233,6 +231,15 @@ public class UserService {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         user.getUsername(), user.getPassword()));
+    }
+
+    private List<String> getUserSqlColumnsDefault() {
+        return new User.Columns()
+                .id()
+                .username()
+                .email()
+                .avatarName()
+                .get();
     }
 
 }

@@ -11,8 +11,6 @@ import unwx.keyB.dto.ArticleEditRequest;
 import unwx.keyB.services.ArticleService;
 
 import java.util.List;
-// TODO : start index, response size; (get page)
-// TODO: JSON view.
 
 @RestController
 @RequestMapping("/api/article")
@@ -31,6 +29,7 @@ public class ArticleRestController {
     }
 
     /**
+     * @deprecated
      * @uri
      * /api/article
      *
@@ -54,10 +53,11 @@ public class ArticleRestController {
      */
     @GetMapping()
     public ResponseEntity<List<Article>> getAll(){
-         return new ResponseEntity<>(articleService.getAll(), HttpStatus.OK);
+         return articleService.get(0, (short) 50);
     }
 
     /**
+     * @deprecated
      * @uri
      * /api/article/{id}
      *

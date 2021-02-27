@@ -1,17 +1,24 @@
 package unwx.keyB.domains;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import unwx.keyB.dao.sql.entities.SqlAttributesExtractor;
+import unwx.keyB.dao.sql.entities.SqlField;
+import unwx.keyB.dao.sql.entities.SqlQueryAttributes;
 
 import javax.persistence.*;
-import java.util.Set;
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
 @Table
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @SuppressWarnings("unused")
-public class User {
+public class User implements SqlAttributesExtractor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "username")
@@ -21,7 +28,7 @@ public class User {
     private String password;
 
     @Column(name = "active")
-    private boolean active;
+    private Boolean active;
 
     @Column(name = "email")
     private String email;
@@ -49,23 +56,23 @@ public class User {
     @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
-    private Set<Role> roles;
+    private List<Role> roles;
 
     @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<Comment> comments;
+    private List<Comment> comments;
 
     @OneToMany(mappedBy = "author", orphanRemoval = true, fetch = FetchType.LAZY)
-    private Set<Article> articles;
+    private List<Article> articles;
 
     public User(String username,
                 String password,
-                boolean active,
-                Set<Role> roles,
+                Boolean active,
+                List<Role> roles,
                 String email,
                 String accessTokenExpiration,
                 String refreshTokenExpiration,
-                Set<Comment> comments,
-                Set<Article> articles) {
+                List<Comment> comments,
+                List<Article> articles) {
         this.username = username;
         this.password = password;
         this.active = active;
@@ -80,6 +87,33 @@ public class User {
     public User() {
     }
 
+    public User(Long id,
+                String username,
+                String password,
+                Boolean active,
+                String email,
+                String avatarName,
+                String accessTokenExpiration,
+                String refreshTokenExpiration,
+                String accessToken,
+                String refreshToken,
+                List<Role> roles,
+                List<Comment> comments,
+                List<Article> articles) {
+        this.id = id;
+        this.username = username;
+        this.password = password;
+        this.active = active;
+        this.email = email;
+        this.avatarName = avatarName;
+        this.accessTokenExpiration = accessTokenExpiration;
+        this.refreshTokenExpiration = refreshTokenExpiration;
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+        this.roles = roles;
+        this.comments = comments;
+        this.articles = articles;
+    }
 
     public Long getId() {
         return id;
@@ -105,20 +139,12 @@ public class User {
         this.password = password;
     }
 
-    public boolean isActive() {
+    public Boolean isActive() {
         return active;
     }
 
-    public void setActive(boolean active) {
+    public void setActive(Boolean active) {
         this.active = active;
-    }
-
-    public Set<Role> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<Role> roles) {
-        this.roles = roles;
     }
 
     public String getEmail() {
@@ -127,6 +153,14 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public String getAvatarName() {
+        return avatarName;
+    }
+
+    public void setAvatarName(String avatarName) {
+        this.avatarName = avatarName;
     }
 
     public String getAccessTokenExpiration() {
@@ -161,36 +195,78 @@ public class User {
         this.refreshToken = refreshToken;
     }
 
-    public String getAvatarName() {
-        return avatarName;
+    public List<Role> getRoles() {
+        return roles;
     }
 
-    public void setAvatarName(String avatarName) {
-        this.avatarName = avatarName;
+    public void setRoles(List<Role> roles) {
+        this.roles = roles;
     }
 
-    public Set<Comment> getComments() {
+    public List<Comment> getComments() {
         return comments;
     }
 
-    public void setComments(Set<Comment> comments) {
+    public void setComments(List<Comment> comments) {
         this.comments = comments;
     }
 
-    public Set<Article> getArticles() {
+    public List<Article> getArticles() {
         return articles;
     }
 
-    public void setArticles(Set<Article> articles) {
+    public void setArticles(List<Article> articles) {
         this.articles = articles;
     }
 
-    // json view but no magic
+
+    /**
+     * @transient accessToken,
+     * refreshToken.
+     */
+    @Override
+    public SqlQueryAttributes getFields() {
+        List<SqlField> fields = new ArrayList<>() {
+            @Serial
+            private static final long serialVersionUID = 8002889362110590448L;
+
+            {
+                add(new SqlField(id, "id"));
+                add(new SqlField(username, "username"));
+                add(new SqlField(password, "password"));
+                add(new SqlField(email, "email"));
+                add(new SqlField(avatarName, "avatar_name"));
+                add(new SqlField(accessTokenExpiration, "access_expiration"));
+                add(new SqlField(refreshTokenExpiration, "refresh_expiration"));
+            }
+        };
+        return new SqlQueryAttributes(fields, new SqlField(id, "id"));
+    }
+
+    @Override
+    public SqlField getPrimaryKey() {
+        return new SqlField(id, "id");
+    }
+
+    @Override
+    public SqlField getSecondUniqueKey() {
+        return new SqlField(username, "username");
+    }
+
+    public String getSecondKey() {
+        return username;
+    }
+
     public static class Builder {
         private final User user;
 
         public Builder() {
             user = new User();
+        }
+
+        public Builder id(Long id) {
+            user.id = id;
+            return this;
         }
 
         public Builder username(String username) {
@@ -203,7 +279,7 @@ public class User {
             return this;
         }
 
-        public Builder active(boolean active) {
+        public Builder active(Boolean active) {
             user.active = active;
             return this;
         }
@@ -238,23 +314,76 @@ public class User {
             return this;
         }
 
-        public Builder roles(Set<Role> roles) {
+        public Builder roles(List<Role> roles) {
             user.roles = roles;
             return this;
         }
 
-        public Builder comments(Set<Comment> comments) {
+        public Builder comments(List<Comment> comments) {
             user.comments = comments;
             return this;
         }
 
-        public Builder articles(Set<Article> articles) {
+        public Builder articles(List<Article> articles) {
             user.articles = articles;
             return this;
         }
 
         public User build() {
             return user;
+        }
+    }
+
+    public static class Columns {
+
+        private final List<String> columns;
+
+        public Columns() {
+            columns = new LinkedList<>();
+        }
+
+        public Columns id() {
+            columns.add("id");
+            return this;
+        }
+
+        public Columns username() {
+            columns.add("username");
+            return this;
+        }
+
+        public Columns password() {
+            columns.add("password");
+            return this;
+        }
+
+        public Columns active() {
+            columns.add("active");
+            return this;
+        }
+
+        public Columns email() {
+            columns.add("email");
+            return this;
+        }
+
+        public Columns avatarName() {
+            columns.add("avatar_name");
+            return this;
+        }
+
+        public Columns accessTokenExpiration() {
+            columns.add("access_expiration");
+            return this;
+        }
+
+        public Columns refreshTokenExpiration() {
+            columns.add("refresh_expiration");
+            return this;
+        }
+
+        public List<String> get() {
+            return columns;
         }
     }
 }

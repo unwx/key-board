@@ -26,6 +26,7 @@ public class CommentRestController {
 
 
     /**
+     * @deprecated
      * @uri
      * /api/comment/create
      *
@@ -65,6 +66,7 @@ public class CommentRestController {
     }
 
     /**
+     * @deprecated
      * @uri
      * /api/comment/edit
      *

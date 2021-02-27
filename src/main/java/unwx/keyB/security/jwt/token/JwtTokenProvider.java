@@ -64,7 +64,7 @@ public class JwtTokenProvider {
         if (token != null && token.startsWith("Bearer_")) {
             return token.substring(7);
         }
-        return null;
+        return token;
     }
 
     public String getUsername(String token) {

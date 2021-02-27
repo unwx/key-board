@@ -1,7 +1,6 @@
 package unwx.keyB.exceptions.rest.handlers;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -79,13 +78,13 @@ public class RestExceptionHandlerController {
                 request.getDescription(false));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handle(Exception ex) {
-        if (ex instanceof NullPointerException) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-    }
+//    @ExceptionHandler(Exception.class)
+//    public ResponseEntity<Object> handle(Exception ex) {
+//        if (ex instanceof NullPointerException) {
+//            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+//        }
+//        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+//    }
 
 
 

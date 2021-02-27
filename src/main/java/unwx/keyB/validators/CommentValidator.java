@@ -24,7 +24,8 @@ public class CommentValidator extends Validator{
                 request.getText(),
                 request.getArticleId()) &&
 
-                isLengthValid(request.getText().trim().length());
+                isLengthValid(request.getText().trim().length()) &&
+                request.getArticleId() > -1;
     }
 
     public boolean isValidToEdit(CommentEditRequest request) {

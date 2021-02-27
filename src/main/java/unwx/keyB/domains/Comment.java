@@ -1,32 +1,41 @@
 package unwx.keyB.domains;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import unwx.keyB.dao.sql.entities.SqlAttributesExtractor;
+import unwx.keyB.dao.sql.entities.SqlField;
+import unwx.keyB.dao.sql.entities.SqlQueryAttributes;
+
 import javax.persistence.*;
+import java.io.Serial;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 
 @Entity
 @Table
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer", "handler"})
 @SuppressWarnings("unused")
-public class Comment {
+public class Comment implements SqlAttributesExtractor {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
     @Column(name = "text", length = 1024)
     private String text;
 
     @Column(name = "likes", nullable = false)
-    private int likes;
+    private Integer likes;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "article_id")
+    @JoinColumn(name = "article_id", referencedColumnName = "id")
     private Article article;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", referencedColumnName = "id")
     private User author;
 
     public Comment(String text,
-                   int likes,
+                   Integer likes,
                    Article article,
                    User author) {
         this.text = text;
@@ -38,6 +47,17 @@ public class Comment {
     public Comment() {
     }
 
+    public Comment(Long id,
+                   String text,
+                   Integer likes,
+                   Article article,
+                   User author) {
+        this.id = id;
+        this.text = text;
+        this.likes = likes;
+        this.article = article;
+        this.author = author;
+    }
 
     public Long getId() {
         return id;
@@ -55,11 +75,11 @@ public class Comment {
         this.text = text;
     }
 
-    public int getLikes() {
+    public Integer getLikes() {
         return likes;
     }
 
-    public void setLikes(int likes) {
+    public void setLikes(Integer likes) {
         this.likes = likes;
     }
 
@@ -77,6 +97,32 @@ public class Comment {
 
     public void setAuthor(User author) {
         this.author = author;
+    }
+
+    @Override
+    public SqlQueryAttributes getFields() {
+        List<SqlField> fields = new ArrayList<>() {
+            @Serial
+            private static final long serialVersionUID = 2008765166480397823L;
+
+            {
+                add(new SqlField(id, "id"));
+                add(new SqlField(text, "text"));
+                add(new SqlField(likes, "likes"));
+            }
+        };
+        return new SqlQueryAttributes(fields, new SqlField(id, "id"));
+    }
+
+    @Override
+    public SqlField getPrimaryKey() {
+        return new SqlField(id, "id");
+    }
+
+    @Override
+    @Deprecated
+    public SqlField getSecondUniqueKey() {
+        return null;
     }
 
     public static class Builder {
@@ -97,7 +143,7 @@ public class Comment {
             return this;
         }
 
-        public Builder likes(int likes) {
+        public Builder likes(Integer likes) {
             comment.likes = likes;
             return this;
         }
@@ -114,6 +160,34 @@ public class Comment {
 
         public Comment build() {
             return this.comment;
+        }
+    }
+
+    public static class Columns {
+
+        private final List<String> columns;
+
+        public Columns() {
+            columns = new LinkedList<>();
+        }
+
+        public Columns id() {
+            columns.add("id");
+            return this;
+        }
+
+        public Columns text() {
+            columns.add("text");
+            return this;
+        }
+
+        public Columns likes() {
+            columns.add("likes");
+            return this;
+        }
+
+        public List<String> get() {
+            return columns;
         }
     }
 }

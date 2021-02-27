@@ -29,6 +29,7 @@ public class AuthenticationRestController {
 
 
     /**
+     * @deprecated
      * @uri
      * /api/auth/login
      *
@@ -65,6 +66,7 @@ public class AuthenticationRestController {
     }
 
     /**
+     * @deprecated
      * @uri
      * /api/auth/registration
      *
