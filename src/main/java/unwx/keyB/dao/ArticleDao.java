@@ -9,7 +9,7 @@ import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
 import unwx.keyB.dao.utils.impl.ArticleComplexDaoUtilsImpl;
 import unwx.keyB.domains.Article;
-import unwx.keyB.exceptions.internal.SqlIllegalArgumentException;
+import unwx.keyB.exceptions.internal.sql.SqlIllegalArgumentException;
 
 import java.util.Collections;
 import java.util.List;

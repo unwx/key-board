@@ -14,8 +14,6 @@ import unwx.keyB.services.UserService;
 
 import javax.servlet.ServletRequest;
 
-// TODO : JSON view.
-
 @RestController
 @RequestMapping(value = "/api/auth/")
 public class AuthenticationRestController {
@@ -29,7 +27,6 @@ public class AuthenticationRestController {
 
 
     /**
-     * @deprecated
      * @uri
      * /api/auth/login
      *
@@ -45,6 +42,7 @@ public class AuthenticationRestController {
      * @response
      * (OK):
      *  User {
+     *      id: long
      *      username: string
      *      email: string
      *      accessToken: string
@@ -66,7 +64,6 @@ public class AuthenticationRestController {
     }
 
     /**
-     * @deprecated
      * @uri
      * /api/auth/registration
      *
@@ -83,6 +80,7 @@ public class AuthenticationRestController {
      * @response
      * (OK):
      *  User {
+     *      id: long
      *      username: string
      *      email: string
      *      accessToken: string

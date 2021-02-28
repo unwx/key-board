@@ -1,6 +1,10 @@
 package unwx.keyB.dao;
 
+import org.hibernate.Session;
+import org.hibernate.SessionFactory;
+import org.hibernate.Transaction;
 import org.jetbrains.annotations.NotNull;
+import unwx.keyB.config.hibernate.HibernateUtil;
 import unwx.keyB.dao.entities.DeleteType;
 import unwx.keyB.dao.entities.SaveType;
 import unwx.keyB.dao.instructions.DefaultDAO;
@@ -8,8 +12,9 @@ import unwx.keyB.dao.sql.entities.DatabaseTable;
 import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
 import unwx.keyB.dao.utils.impl.UserComplexDaoUtilsImpl;
+import unwx.keyB.dao.utils.impl.UserRoleInserter;
 import unwx.keyB.domains.User;
-import unwx.keyB.exceptions.internal.SqlIllegalArgumentException;
+import unwx.keyB.exceptions.internal.sql.SqlIllegalArgumentException;
 
 import java.util.Collections;
 import java.util.List;
@@ -26,14 +31,18 @@ public class UserDao implements DefaultDAO<User, Long> {
                     DatabaseTable::getUser,
                     User::new);
 
+    private final SessionFactory sessionFactory = HibernateUtil.getSessionFactory();
+
     @Override
     public Long save(@NotNull User e,
                      @NotNull SaveType s) throws SqlIllegalArgumentException {
         if (s == SaveType.CREATE) {
-            return dao.create(e, Collections.emptyList());
+            Long id = dao.create(e, Collections.emptyList());
+            obligatoryFieldsProcess(e, id);
+            return id;
         }
         if (s == SaveType.UPDATE) {
-            if (e.getId() != null) {
+            if (e.getId() != null || e.getSecondKey() != null) {
                 dao.update(e);
                 return e.getId();
             }
@@ -93,5 +102,18 @@ public class UserDao implements DefaultDAO<User, Long> {
                                     @NotNull String where,
                                     short limit) {
         return dao.readManyEager(linkedId, columns, requests, where, limit);
+    }
+
+    private void obligatoryFieldsProcess(User user, Long id) {
+        if (user.getRoles() == null || user.getRoles().isEmpty())
+            throw new SqlIllegalArgumentException("no user roles");
+        UserRoleInserter userRoleInserter = new UserRoleInserter();
+        try(Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            userRoleInserter.setRoles(user.getRoles(), id, session);
+
+            transaction.commit();
+        }
     }
 }

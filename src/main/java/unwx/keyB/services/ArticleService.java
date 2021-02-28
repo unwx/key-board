@@ -140,7 +140,8 @@ public class ArticleService {
                             DatabaseTable.USER,
                             Collections.singletonList("username"),
                             (short) 1,
-                            false)),
+                            false,
+                            "user_id")),
                     new SqlField(id, "id"));
             if (article.getAuthor().getUsername().equals(user.getUsername())) {
                 articleDao.delete(new SqlField(id, "id"), DeleteType.ORPHAN_REMOVAL);
@@ -165,7 +166,8 @@ public class ArticleService {
                 new SqlTableRequest(
                         DatabaseTable.USER,
                         Collections.singletonList("username"),
-                        false)
+                        false,
+                        "user_id")
         ).getAuthor().getUsername();
 
         return tokenUsername.equals(authorUsername);
@@ -186,7 +188,8 @@ public class ArticleService {
                     }
                 },
                 (short) 1,
-                false);
+                false,
+                "user_id");
     }
 
     private List<String> getArticleSqlColumnsDefault() {

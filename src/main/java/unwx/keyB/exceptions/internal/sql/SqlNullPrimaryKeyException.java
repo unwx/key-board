@@ -1,4 +1,4 @@
-package unwx.keyB.exceptions.internal;
+package unwx.keyB.exceptions.internal.sql;
 
 import java.io.Serial;
 

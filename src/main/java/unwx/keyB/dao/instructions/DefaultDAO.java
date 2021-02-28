@@ -5,7 +5,7 @@ import unwx.keyB.dao.entities.DeleteType;
 import unwx.keyB.dao.entities.SaveType;
 import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
-import unwx.keyB.exceptions.internal.SqlIllegalArgumentException;
+import unwx.keyB.exceptions.internal.sql.SqlIllegalArgumentException;
 
 import java.util.List;
 

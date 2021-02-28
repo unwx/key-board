@@ -8,18 +8,21 @@ public class SqlTableRequest {
     private final List<String> columns;
     private short limit = 50;
     private final boolean nested;
+    private final String linkedColumn;
 
-    public SqlTableRequest(DatabaseTable table, List<String> columns, boolean nested) {
+    public SqlTableRequest(DatabaseTable table, List<String> columns, boolean nested, String linkedColumn) {
         this.table = table;
         this.columns = columns;
         this.nested = nested;
+        this.linkedColumn = linkedColumn;
     }
 
-    public SqlTableRequest(DatabaseTable table, List<String> columns, short limit, boolean nested) {
+    public SqlTableRequest(DatabaseTable table, List<String> columns, short limit, boolean nested, String linkedColumn) {
         this.table = table;
         this.columns = columns;
         this.limit = limit;
         this.nested = nested;
+        this.linkedColumn = linkedColumn;
     }
 
     public DatabaseTable getTable() {
@@ -40,5 +43,9 @@ public class SqlTableRequest {
 
     public boolean isNested() {
         return nested;
+    }
+
+    public String getLinkedColumn() {
+        return linkedColumn;
     }
 }

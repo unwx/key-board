@@ -109,7 +109,7 @@ public class UserService {
     }
 
     private User registrationProcess(UserRegistrationRequest request) {
-        if (validator.isValidRegistration(request) && isDuplicateUsername(request)) {
+        if (validator.isValidRegistration(request) && isNotDuplicateUsername(request)) {
             User toCreate = new User.Builder()
                     .username(request.getUsername())
                     .email(request.getEmail())
@@ -119,10 +119,15 @@ public class UserService {
                     .active(true)
                     .build();
 
+            updateUserToken(toCreate);
+
             Long createdId = userDao.save(toCreate, SaveType.CREATE);
-            return userDao.readLazy(
+            User response = userDao.readLazy(
                     getUserSqlColumnsDefault(),
                     new SqlField(createdId, "id"));
+            response.setRefreshToken(toCreate.getRefreshToken());
+            response.setAccessTokenExpiration(toCreate.getAccessToken());
+            return response;
         } else throw new BadRequestException("invalid user.");
     }
 
@@ -135,6 +140,7 @@ public class UserService {
 
             if (user != null) {
                 User userWithUpdatedTokens = updateUserToken(user);
+                userDao.save(userWithUpdatedTokens, SaveType.UPDATE);
 
                 return new JwtDto(
                         userWithUpdatedTokens.getAccessToken(),
@@ -177,11 +183,11 @@ public class UserService {
         throw new BadRequestException("not an avatar.");
     }
 
-    private boolean isDuplicateUsername(UserRegistrationRequest userRegistrationRequest) {
+    private boolean isNotDuplicateUsername(UserRegistrationRequest userRegistrationRequest) {
         User u = userDao.readLazy(
                 Collections.singletonList("username"),
                 new SqlField(userRegistrationRequest.getUsername(), "username"));
-        return u != null;
+        return u == null;
     }
 
     private User updateUserToken(User user) {

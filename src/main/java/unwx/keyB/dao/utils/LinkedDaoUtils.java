@@ -42,7 +42,7 @@ public class LinkedDaoUtils<Entity, Key extends Serializable> {
         if (request.isNested()) {
             sql = sqlGenerator.generateReadMany(
                     request.getColumns(),
-                    request.getTable().getValue() + "_id = " + linkedId,
+                    request.getLinkedColumn() + " = " + linkedId,
                     request.getLimit(),
                     request.getTable());
         } else {
@@ -61,7 +61,7 @@ public class LinkedDaoUtils<Entity, Key extends Serializable> {
                         request.getTable());
             } else {
                 daoUtils.setLinkedValueFromObject(
-                        session.createSQLQuery(sql),
+                        session.createSQLQuery(sql).uniqueResult(),
                         e,
                         columns.get(0),
                         request.getTable());

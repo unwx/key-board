@@ -126,7 +126,7 @@ public class CommentService {
                 new SqlTableRequest(
                         DatabaseTable.USER,
                         Collections.singletonList("username"),
-                        false)
+                        false, "user_id")
         ).getAuthor().getUsername();
 
         return tokenUsername.equals(authorUsername);
@@ -155,6 +155,7 @@ public class CommentService {
                     }
                 },
                 (short) 1,
-                false);
+                false,
+                "user_id");
     }
 }

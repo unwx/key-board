@@ -4,7 +4,7 @@ import unwx.keyB.dao.sql.entities.DatabaseTable;
 import unwx.keyB.dao.sql.entities.SqlAttributesExtractor;
 import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlQueryAttributes;
-import unwx.keyB.exceptions.internal.SqlNullPrimaryKeyException;
+import unwx.keyB.exceptions.internal.sql.SqlNullPrimaryKeyException;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -147,6 +147,10 @@ public class SqlGenerator {
                 ";";
     }
 
+    public String generateGetLastId() {
+        return "SELECT LAST_INSERT_ID();";
+    }
+
     private String constructCreate(DatabaseTable table,
                                    List<String> columns,
                                    List<Object> values) {
@@ -163,8 +167,7 @@ public class SqlGenerator {
                     .append(") ")
                     .append("VALUES (")
                     .append(valuesToSingleString(values))
-                    .append(");")
-                    .append("SELECT LAST_INSERT_ID();");
+                    .append(");");
         }
         return sb.toString();
     }

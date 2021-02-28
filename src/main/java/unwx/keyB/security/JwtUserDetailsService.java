@@ -33,7 +33,8 @@ public class JwtUserDetailsService implements UserDetailsService {
         SqlTableRequest request = new SqlTableRequest(
                 DatabaseTable.USER_ROLE,
                 Collections.singletonList("roles"),
-                true);
+                true,
+                "user_id");
 
         User user = userDao.readLazy(columns, new SqlField(username, "username"));
 

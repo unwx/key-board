@@ -1,5 +1,6 @@
 package unwx.keyB.domains;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import unwx.keyB.dao.sql.entities.SqlAttributesExtractor;
@@ -27,7 +28,7 @@ public class User implements SqlAttributesExtractor {
     @Column(name = "password")
     private String password;
 
-    @Column(name = "active")
+    @Column(name = "active", columnDefinition = "TINYINT(1)")
     private Boolean active;
 
     @Column(name = "email")
@@ -225,6 +226,7 @@ public class User implements SqlAttributesExtractor {
      * refreshToken.
      */
     @Override
+    @JsonIgnore
     public SqlQueryAttributes getFields() {
         List<SqlField> fields = new ArrayList<>() {
             @Serial
@@ -235,6 +237,11 @@ public class User implements SqlAttributesExtractor {
                 add(new SqlField(username, "username"));
                 add(new SqlField(password, "password"));
                 add(new SqlField(email, "email"));
+
+                if (active == null)
+                    add(new SqlField(active, "active"));
+                else add(new SqlField(active ? 1 : 0, "active"));
+
                 add(new SqlField(avatarName, "avatar_name"));
                 add(new SqlField(accessTokenExpiration, "access_expiration"));
                 add(new SqlField(refreshTokenExpiration, "refresh_expiration"));
@@ -244,15 +251,18 @@ public class User implements SqlAttributesExtractor {
     }
 
     @Override
+    @JsonIgnore
     public SqlField getPrimaryKey() {
         return new SqlField(id, "id");
     }
 
     @Override
+    @JsonIgnore
     public SqlField getSecondUniqueKey() {
         return new SqlField(username, "username");
     }
 
+    @JsonIgnore
     public String getSecondKey() {
         return username;
     }

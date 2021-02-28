@@ -4,6 +4,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import unwx.keyB.config.hibernate.HibernateUtil;
 import unwx.keyB.dao.instructions.LinkedDaoOrphanRemoval;
 import unwx.keyB.dao.sql.SqlGenerator;
@@ -13,10 +14,12 @@ import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
 import unwx.keyB.dao.utils.ComplexDaoUtils;
 import unwx.keyB.dao.utils.LinkedDaoUtils;
-import unwx.keyB.exceptions.internal.SqlCastException;
+import unwx.keyB.exceptions.internal.sql.SqlCastException;
 import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 
+import javax.persistence.NoResultException;
 import java.io.Serializable;
+import java.math.BigInteger;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -27,6 +30,7 @@ public class LinkedDaoImpl<
         Key extends Serializable,
         DaoUtils extends ComplexDaoUtils<Entity, Key>
         >
+        extends unwx.keyB.dao.utils.DaoUtils
         implements LinkedDaoOrphanRemoval<Entity, Key
         > {
 
@@ -56,16 +60,23 @@ public class LinkedDaoImpl<
             Transaction transaction = session.beginTransaction();
 
             String sql = sqlGenerator.generateCreate(entity, table, externalEntities);
-            Object id = session.createSQLQuery(sql).getSingleResult();
+
+            session.createSQLQuery(sql).executeUpdate();
+            String getIdSql = sqlGenerator.generateGetLastId();
+            Object id = session.createSQLQuery(getIdSql).uniqueResult();
+
             if (id instanceof Serializable) {
                 daoUtils.nestedAttributesSqlCreateProcess(session, entity);
                 transaction.commit();
+                if (id instanceof BigInteger)
+                    return (Key) convertBigintToLong((BigInteger) id);
                 return (Key) id;
             } else throw new SqlCastException("cast exception. Object -> Key");
         }
     }
 
     @Override
+    @Nullable
     public Entity readLazy(@NotNull final List<String> columns,
                            @NotNull final SqlField where) {
         try (Session session = sessionFactory.openSession()) {
@@ -83,8 +94,8 @@ public class LinkedDaoImpl<
 
             transaction.commit();
             return entity;
-        } catch (NullPointerException ex) {
-            throw new ResourceNotFoundException(where.getColumn() + " = " + where.getValue() + "not found.");
+        } catch (NoResultException e) {
+            return null;
         }
     }
 
