@@ -31,7 +31,7 @@ public class ArticleDao implements DefaultDAO<Article, Long> {
                      @NotNull SaveType s) throws SqlIllegalArgumentException {
         if (s == SaveType.CREATE) {
             if (e.getAuthor().getId() != null)
-                return dao.create(e, Collections.singletonList(new SqlField(e.getAuthor().getId(), "id")));
+                return dao.create(e, Collections.singletonList(new SqlField(e.getAuthor().getId(), "user_id")));
             throw new SqlIllegalArgumentException("nested arguments required.");
         }
         if (s == SaveType.UPDATE) {

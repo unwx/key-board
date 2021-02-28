@@ -85,10 +85,14 @@ public class LinkedDaoImpl<
             String sql = sqlGenerator.generateRead(columns, where, table);
             Entity entity;
             if (columns.size() != 1) {
-                Object[] result = (Object[]) session.createSQLQuery(sql).getSingleResult();
+                Object[] result = (Object[]) session.createSQLQuery(sql).uniqueResult();
+                if (result == null)
+                    return null;
                 entity = daoUtils.extractEntityFromObject(result, columns);
             } else {
-                Object result = session.createSQLQuery(sql).getSingleResult();
+                Object result = session.createSQLQuery(sql).uniqueResult();
+                if (result == null)
+                    return null;
                 entity = daoUtils.extractEntityFromObject(result, columns.get(0));
             }
 

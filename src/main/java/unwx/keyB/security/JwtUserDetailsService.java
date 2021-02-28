@@ -24,7 +24,6 @@ public class JwtUserDetailsService implements UserDetailsService {
         List<String> columns = new User.Columns()
                 .username()
                 .id()
-                .email()
                 .active()
                 .accessTokenExpiration()
                 .refreshTokenExpiration()

@@ -226,7 +226,6 @@ public class User implements SqlAttributesExtractor {
      * refreshToken.
      */
     @Override
-    @JsonIgnore
     public SqlQueryAttributes getFields() {
         List<SqlField> fields = new ArrayList<>() {
             @Serial
@@ -251,13 +250,11 @@ public class User implements SqlAttributesExtractor {
     }
 
     @Override
-    @JsonIgnore
     public SqlField getPrimaryKey() {
         return new SqlField(id, "id");
     }
 
     @Override
-    @JsonIgnore
     public SqlField getSecondUniqueKey() {
         return new SqlField(username, "username");
     }

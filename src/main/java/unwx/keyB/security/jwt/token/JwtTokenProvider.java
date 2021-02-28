@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -105,7 +106,7 @@ public class JwtTokenProvider {
         return new JWTokenData(token, expiration);
     }
 
-    public JwtStatus validate(String token) {
+    public ImmutablePair<JwtStatus, JwtUser> validate(String token) {
         try {
             DecodedJWT jwtDecoded = JWT.require(algorithm)
                     .withIssuer("key-b")
@@ -114,18 +115,17 @@ public class JwtTokenProvider {
             long dateAtMillis = Long.parseLong(jwtDecoded.getClaim("expiration").asString());
 
             if (getCurrentTimeAtMillis() > dateAtMillis)
-                return JwtStatus.EXPIRED;
+                return new ImmutablePair<>(JwtStatus.EXPIRED, null);
 
             JwtUser user = (JwtUser) jwtUserDetailsService.loadUserByUsername(jwtDecoded.getSubject());
             if (!(isTokenActual(dateAtMillis, Long.parseLong(user.getAccessTokenExpiration()))
             || isTokenActual(dateAtMillis, Long.parseLong(user.getRefreshTokenExpiration())))) {
-                return JwtStatus.INVALID;
+                return new ImmutablePair<>(JwtStatus.INVALID, null);
             }
+            return new ImmutablePair<>(JwtStatus.VALID, user);
         } catch (JWTVerificationException e) {
-            return JwtStatus.INVALID;
+            return new ImmutablePair<>(JwtStatus.INVALID, null);
         }
-
-        return JwtStatus.VALID;
     }
 
     public ClaimsDto getClaims(@NotNull String token) {

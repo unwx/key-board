@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import unwx.keyB.domains.Article;
 import unwx.keyB.dto.ArticleCreateRequest;
 import unwx.keyB.dto.ArticleEditRequest;
+import unwx.keyB.dto.PieceOfInformationRequest;
 import unwx.keyB.services.ArticleService;
 
 import java.util.List;
@@ -37,7 +38,10 @@ public class ArticleRestController {
      * get
      *
      * @request
-     * -
+     * Request {
+     *     startIndex: int;
+     *     size: short;
+     * }
      *
      * @response
      * [
@@ -52,8 +56,8 @@ public class ArticleRestController {
      * ]
      */
     @GetMapping()
-    public ResponseEntity<List<Article>> getAll(){
-         return articleService.get(0, (short) 50);
+    public ResponseEntity<List<Article>> getAll(@RequestBody PieceOfInformationRequest request){
+         return articleService.get(request);
     }
 
     /**
@@ -115,6 +119,12 @@ public class ArticleRestController {
      *     link: string
      *     text: string
      *     creationDate: string
+     *     likes: localDateTime;
+     *     Author {
+     *         id: long
+     *         username: string
+     *         avatar_name: string
+     *     }
      * }
      *
      * (BadRequestException):
@@ -146,6 +156,28 @@ public class ArticleRestController {
      * }
      *
      * @response
+     * (OK):
+     * Article {
+     *     id: long
+     *     title: string
+     *     link: string
+     *     text: string
+     *     creationDate: string
+     *     likes: localDateTime;
+     *     Author {
+     *         id: long
+     *         username: string
+     *         avatar_name: string
+     *     }
+     * }
+     *
+     * (BadRequestException | AccessDeniedException):
+     * ErrorMessage {
+     *      statusCode: int
+     *      timestamp: string
+     *      message: string
+     *      description: string
+     * }
      */
     @PutMapping()
     public ResponseEntity<Article> edit(@RequestBody ArticleEditRequest article,

@@ -70,7 +70,7 @@ public class RestExceptionHandlerController {
 
     @ExceptionHandler(AccessDeniedException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
-    public ErrorMessage accessDeniedException(BadCredentialsException ex, WebRequest request) {
+    public ErrorMessage accessDeniedException(AccessDeniedException ex, WebRequest request) {
         return new ErrorMessage(
                 HttpStatus.FORBIDDEN.value(),
                 new Date(),

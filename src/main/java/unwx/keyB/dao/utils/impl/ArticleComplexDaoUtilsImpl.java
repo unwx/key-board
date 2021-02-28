@@ -8,10 +8,11 @@ import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.utils.ComplexDaoUtils;
 import unwx.keyB.dao.utils.DaoUtils;
 import unwx.keyB.domains.Article;
+import unwx.keyB.domains.User;
 
 import java.io.Serial;
 import java.math.BigInteger;
-import java.time.LocalDateTime;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
@@ -110,9 +111,9 @@ public class ArticleComplexDaoUtilsImpl extends DaoUtils implements ComplexDaoUt
             case "title" -> target.setTitle((String) obj);
             case "link" -> target.setLink((String) obj);
             case "text" -> target.setText((String) obj);
-            case "creation_date" -> target.setCreationDate((LocalDateTime) obj);
+            case "creation_date" -> target.setCreationDate((convertTimestampToLocalDateTime((Timestamp) obj)));
             case "likes" -> target.setLikes((Integer) obj);
-            case "user_id" -> target.getAuthor().setId((Long) obj);
+            case "user_id" -> target.setAuthor(new User.Builder().id(convertBigintToLong((BigInteger) obj)).build());
         }
     }
 
@@ -145,8 +146,11 @@ public class ArticleComplexDaoUtilsImpl extends DaoUtils implements ComplexDaoUt
     @Override
     public void setLinkedValuesFromObjects(List<Object> objects, Article target, String column, DatabaseTable table) {
         CommentComplexDaoUtilsImpl commentComplexDaoUtilsImpl = new CommentComplexDaoUtilsImpl();
-        if (table == DatabaseTable.COMMENT) {
-            target.setComments(new LinkedList<>() {
+        UserComplexDaoUtilsImpl userComplexDaoUtils = new UserComplexDaoUtilsImpl();
+
+
+        switch (table) {
+            case COMMENT -> target.setComments(new LinkedList<>() {
 
                 @Serial
                 private static final long serialVersionUID = 3571199152744582831L;
@@ -155,14 +159,18 @@ public class ArticleComplexDaoUtilsImpl extends DaoUtils implements ComplexDaoUt
                     objects.forEach((o) -> add(commentComplexDaoUtilsImpl.extractEntityFromObject(o, column)));
                 }
             });
+
+            case USER -> target.setAuthor(userComplexDaoUtils.extractEntityFromObject(objects.get(0), column));
         }
     }
 
     @Override
     public void setLinkedValuesFromObjects(List<Object[]> objects, Article target, List<String> columns, DatabaseTable table) {
         CommentComplexDaoUtilsImpl commentComplexDaoUtilsImpl = new CommentComplexDaoUtilsImpl();
-        if (table == DatabaseTable.COMMENT) {
-            target.setComments(new LinkedList<>() {
+        UserComplexDaoUtilsImpl userComplexDaoUtils = new UserComplexDaoUtilsImpl();
+
+        switch (table) {
+            case COMMENT -> target.setComments(new LinkedList<>() {
 
                 @Serial
                 private static final long serialVersionUID = 8499084425730378116L;
@@ -171,6 +179,8 @@ public class ArticleComplexDaoUtilsImpl extends DaoUtils implements ComplexDaoUt
                     objects.forEach((o) -> add(commentComplexDaoUtilsImpl.extractEntityFromObject(o, columns)));
                 }
             });
+
+            case USER -> target.setAuthor(userComplexDaoUtils.extractEntityFromObject(objects.get(0), columns));
         }
     }
 }

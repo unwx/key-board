@@ -1,9 +1,12 @@
 package unwx.keyB.security.jwt.token;
 
+import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.filter.GenericFilterBean;
 import unwx.keyB.dto.ClaimsDto;
+import unwx.keyB.security.jwt.user.JwtUser;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -17,7 +20,7 @@ public class JwtTokenFilter extends GenericFilterBean {
 
     private final JwtTokenProvider jwtTokenProvider;
 
-    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider){
+    public JwtTokenFilter(JwtTokenProvider jwtTokenProvider) {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
@@ -26,12 +29,12 @@ public class JwtTokenFilter extends GenericFilterBean {
         String token = jwtTokenProvider.resolveToken((HttpServletRequest) servletRequest);
 
         if (token != null) {
-            JwtStatus jwtValidationStatus = jwtTokenProvider.validate(token);
-            if (jwtValidationStatus == JwtStatus.VALID) {
+            ImmutablePair<JwtStatus, JwtUser> jwtValidation = jwtTokenProvider.validate(token);
+            if (jwtValidation.left == JwtStatus.VALID) {
                 ClaimsDto claims = jwtTokenProvider.getClaims(token);
                 String type = claims.getClaims().get("type").asString();
                 if (type.equals("access") && !((HttpServletRequest) servletRequest).getRequestURI().equals("/api/auth/refresh"))
-                    processAccessToken(token);
+                    processAccessToken(jwtValidation.right);
                 if (type.equals("refresh") && ((HttpServletRequest) servletRequest).getRequestURI().equals("/api/auth/refresh"))
                     processRefreshToken(servletRequest, claims);
             }
@@ -39,11 +42,9 @@ public class JwtTokenFilter extends GenericFilterBean {
         filterChain.doFilter(servletRequest, servletResponse);
     }
 
-    private void processAccessToken(String token) {
-        Authentication authentication = jwtTokenProvider.getAuthentication(token);
-        if (authentication != null) {
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-        }
+    private void processAccessToken(JwtUser user) {
+        Authentication authentication = new UsernamePasswordAuthenticationToken(user, "", user.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
     private void processRefreshToken(ServletRequest servletRequest, ClaimsDto claims) {
