@@ -14,12 +14,14 @@ import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
 import unwx.keyB.dao.utils.ComplexDaoUtils;
 import unwx.keyB.dao.utils.LinkedDaoUtils;
-import unwx.keyB.exceptions.internal.sql.SqlCastException;
+import unwx.keyB.exceptions.internal.dao.SqlCastException;
 import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 
 import javax.persistence.NoResultException;
+import java.io.Serial;
 import java.io.Serializable;
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -30,7 +32,7 @@ public class LinkedDaoImpl<
         Key extends Serializable,
         DaoUtils extends ComplexDaoUtils<Entity, Key>
         >
-        extends unwx.keyB.dao.utils.DaoUtils
+        extends LinkedDaoUtils<Entity, Key>
         implements LinkedDaoOrphanRemoval<Entity, Key
         > {
 
@@ -38,7 +40,6 @@ public class LinkedDaoImpl<
     private final SqlGenerator sqlGenerator = new SqlGenerator();
 
     private final DaoUtils daoUtils;
-    private final LinkedDaoUtils<Entity, Key> linkedDaoUtils;
     private final DatabaseTable table;
 
     private final Supplier<Entity> initializedEntitySupplier;
@@ -47,8 +48,8 @@ public class LinkedDaoImpl<
                          Supplier<DatabaseTable> table,
                          Supplier<Entity> initializedEntitySupplier) {
 
+        super(daoUtilsSupplier.get());
         this.daoUtils = daoUtilsSupplier.get();
-        this.linkedDaoUtils = new LinkedDaoUtils<>(daoUtils);
         this.table = table.get();
         this.initializedEntitySupplier = initializedEntitySupplier;
     }
@@ -136,7 +137,7 @@ public class LinkedDaoImpl<
             Transaction transaction = session.beginTransaction();
 
             Entity entity = readLazy(columns, where);
-            linkedDaoUtils.setLinkedEntities(linkedId, requests, entity, session);
+            setLinkedEntities(linkedId, requests, entity, session);
 
             transaction.commit();
             return entity;
@@ -155,7 +156,7 @@ public class LinkedDaoImpl<
             Transaction transaction = session.beginTransaction();
 
             List<Entity> entities = readManyLazy(columns, where, limit);
-            entities.forEach((a) -> linkedDaoUtils.setLinkedEntities(linkedId, requests, a, session));
+            entities.forEach((a) -> setLinkedEntities(linkedId, requests, a, session));
 
             transaction.commit();
             return entities;
@@ -171,7 +172,7 @@ public class LinkedDaoImpl<
             Transaction transaction = session.beginTransaction();
 
             Entity source = initializedEntitySupplier.get();
-            linkedDaoUtils.setLinkedEntity(linkedId, request, source, session);
+            setLinkedEntity(linkedId, request, source, session);
 
             transaction.commit();
             return source;
@@ -186,8 +187,55 @@ public class LinkedDaoImpl<
             Transaction transaction = session.beginTransaction();
 
             Entity source = initializedEntitySupplier.get();
-            linkedDaoUtils.setLinkedEntities(linkedId, request, source, session);
+            setLinkedEntities(linkedId, request, source, session);
 
+            transaction.commit();
+            return source;
+        } catch (NullPointerException ex) {
+            throw new ResourceNotFoundException("not found.");
+        }
+    }
+
+    @Override
+    public List<Entity> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                     @NotNull List<SqlTableRequest> requests) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            List<Entity> source = new ArrayList<>(linkedIds.size()) {
+                @Serial
+                private static final long serialVersionUID = 2840771052042110849L;
+
+                {
+                    linkedIds.forEach((e) -> add(initializedEntitySupplier.get()));
+                }
+            };
+
+            setLinkedEntitiesManyToMany(linkedIds, requests, source, session);
+            transaction.commit();
+            return source;
+        } catch (NullPointerException ex) {
+            throw new ResourceNotFoundException("not found.");
+        }
+    }
+
+    @Override
+    public List<Entity> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                     @NotNull SqlTableRequest requests) {
+        try (Session session = sessionFactory.openSession()) {
+            Transaction transaction = session.beginTransaction();
+
+            List<Entity> source = new ArrayList<>(linkedIds.size()) {
+
+                @Serial
+                private static final long serialVersionUID = 6695142067662534178L;
+
+                {
+                    linkedIds.forEach((e) -> add(initializedEntitySupplier.get()));
+                }
+            };
+
+            setLinkedEntitiesManyToMany(linkedIds, requests, source, session);
             transaction.commit();
             return source;
         } catch (NullPointerException ex) {

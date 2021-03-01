@@ -6,7 +6,9 @@ import unwx.keyB.dao.sql.SqlGenerator;
 import unwx.keyB.dao.sql.entities.DatabaseTable;
 import unwx.keyB.dao.utils.ComplexDaoUtils;
 import unwx.keyB.dao.utils.DaoUtils;
+import unwx.keyB.domains.Article;
 import unwx.keyB.domains.Comment;
+import unwx.keyB.domains.User;
 
 import java.math.BigInteger;
 import java.util.List;
@@ -55,8 +57,8 @@ public class CommentComplexDaoUtilsImpl extends DaoUtils implements ComplexDaoUt
             case "id" -> target.setId(convertBigintToLong((BigInteger) obj));
             case "text" -> target.setText((String) obj);
             case "likes" -> target.setLikes((Integer) obj);
-            case "user_id" -> target.getAuthor().setId((Long) obj);
-            case "article_id" -> target.getArticle().setId((Long) obj);
+            case "user_id" -> target.setAuthor(new User.Builder().id(convertBigintToLong((BigInteger) obj)).build());
+            case "article_id" -> target.setArticle(new Article.Builder().id(convertBigintToLong((BigInteger) obj)).build());
         }
     }
 

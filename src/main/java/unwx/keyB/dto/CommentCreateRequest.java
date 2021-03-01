@@ -2,15 +2,15 @@ package unwx.keyB.dto;
 
 public class CommentCreateRequest extends CommentRequest{
 
-    private final long articleId;
+    private final Long articleId;
 
     public CommentCreateRequest(String text,
-                                long articleId) {
+                                Long articleId) {
         super(text);
         this.articleId = articleId;
     }
 
-    public long getArticleId() {
+    public Long getArticleId() {
         return articleId;
     }
 

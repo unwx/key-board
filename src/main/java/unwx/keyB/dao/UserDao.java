@@ -14,7 +14,7 @@ import unwx.keyB.dao.sql.entities.SqlTableRequest;
 import unwx.keyB.dao.utils.impl.UserComplexDaoUtilsImpl;
 import unwx.keyB.dao.utils.impl.UserRoleInserter;
 import unwx.keyB.domains.User;
-import unwx.keyB.exceptions.internal.sql.SqlIllegalArgumentException;
+import unwx.keyB.exceptions.internal.dao.SqlIllegalArgumentException;
 
 import java.util.Collections;
 import java.util.List;
@@ -104,11 +104,23 @@ public class UserDao implements DefaultDAO<User, Long> {
         return dao.readManyEager(linkedId, columns, requests, where, limit);
     }
 
+    @Override
+    public List<User> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                   @NotNull List<SqlTableRequest> requests) {
+        return dao.readLinkedEntitiesManyToMany(linkedIds, requests);
+    }
+
+    @Override
+    public List<User> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                   @NotNull SqlTableRequest requests) {
+        return dao.readLinkedEntitiesManyToMany(linkedIds, requests);
+    }
+
     private void obligatoryFieldsProcess(User user, Long id) {
         if (user.getRoles() == null || user.getRoles().isEmpty())
             throw new SqlIllegalArgumentException("no user roles");
         UserRoleInserter userRoleInserter = new UserRoleInserter();
-        try(Session session = sessionFactory.openSession()) {
+        try (Session session = sessionFactory.openSession()) {
             Transaction transaction = session.beginTransaction();
 
             userRoleInserter.setRoles(user.getRoles(), id, session);

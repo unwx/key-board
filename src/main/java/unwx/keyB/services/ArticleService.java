@@ -25,6 +25,7 @@ import unwx.keyB.exceptions.rest.exceptions.ResourceNotFoundException;
 import unwx.keyB.security.jwt.token.JwtTokenProvider;
 import unwx.keyB.utils.Transliterator;
 import unwx.keyB.validators.ArticleValidator;
+import unwx.keyB.validators.PieceOfInformationSelectValidator;
 
 import java.io.Serial;
 import java.time.LocalDateTime;
@@ -42,6 +43,7 @@ public class ArticleService {
     private final Transliterator transliterator;
     private final ArticleValidator articleValidator;
     private final JwtTokenProvider tokenProvider;
+    private final PieceOfInformationSelectValidator pieceOfInformationSelectValidator = new PieceOfInformationSelectValidator();
     private final ArticleDao articleDao = new ArticleDao();
     private final UserDao userDao = new UserDao();
 
@@ -55,13 +57,16 @@ public class ArticleService {
     }
 
     public ResponseEntity<List<Article>> get(PieceOfInformationRequest request) {
-        List<Article> articles = articleDao.readManyLazy(getArticleSqlColumnsDefault(),
-                "`id` > " + request.getStartIndex(),
-                request.getSize());
-        if (articles != null && !articles.isEmpty()) {
-            return new ResponseEntity<>(articles, HttpStatus.OK);
+        if (pieceOfInformationSelectValidator.isValid(request)) {
+            List<Article> articles = articleDao.readManyLazy(getArticleSqlColumnsDefault(),
+                    "`id`>'" + request.getSelectIndex() + "'",
+                    request.getSize());
+            if (articles != null && !articles.isEmpty()) {
+                return new ResponseEntity<>(articles, HttpStatus.OK);
+            }
+            throw new ResourceNotFoundException("articles not found");
         }
-        throw new ResourceNotFoundException("articles not found");
+        throw new BadRequestException("validation error.");
     }
 
     public ResponseEntity<Article> getById(Long id) {

@@ -7,7 +7,11 @@ import org.springframework.web.bind.annotation.*;
 import unwx.keyB.domains.Comment;
 import unwx.keyB.dto.CommentCreateRequest;
 import unwx.keyB.dto.CommentEditRequest;
+import unwx.keyB.dto.CommentGetFromArticleRequest;
+import unwx.keyB.dto.CommentGetFromUserRequest;
 import unwx.keyB.services.CommentService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/comment")
@@ -24,9 +28,87 @@ public class CommentRestController {
         this.commentService = commentService;
     }
 
+    /**
+     * @uri
+     * /api/comment/get/user
+     *
+     * @method
+     * get
+     *
+     * @request
+     * Request {
+     *     user_id: long
+     *     size: short
+     * }
+     *
+     * @response
+     * (OK):
+     * [
+     *      Comment {
+     *          id: long;
+     *          text: string;
+     *          likes: int;
+     *      }
+     *      ...
+     *  ]
+     *
+     * (Exception):
+     * ErrorMessage {
+     *      statusCode: int
+     *      timestamp: string
+     *      message: string
+     *      description: string
+     * }
+     */
+    @GetMapping("/get/user")
+    public ResponseEntity<List<Comment>> getUserComments(@RequestBody CommentGetFromUserRequest request) {
+        return commentService.getUsersComments(request);
+    }
 
     /**
-     * @deprecated
+     * @uri
+     * /api/comment/get/article
+     *
+     * @method
+     * get
+     *
+     * @request
+     * Request {
+     *     article_id: long
+     *     size: short
+     * }
+     *
+     * @response
+     * (OK):
+     * [
+     *      Comment {
+     *          id: long;
+     *          text: string;
+     *          likes: int;
+     *          Author {
+     *              id: long
+     *              username: string
+     *              avatarName: string;
+     *          }
+     *      }
+     *      ...
+     *  ]
+     *
+     * (Exception):
+     * ErrorMessage {
+     *      statusCode: int
+     *      timestamp: string
+     *      message: string
+     *      description: string
+     * }
+     */
+    @GetMapping("/get/article")
+    public ResponseEntity<List<Comment>> getArticleComments(@RequestBody CommentGetFromArticleRequest request) {
+        return commentService.getArticleComments(request);
+    }
+
+
+    /**
      * @uri
      * /api/comment/create
      *
@@ -66,7 +148,6 @@ public class CommentRestController {
     }
 
     /**
-     * @deprecated
      * @uri
      * /api/comment/edit
      *
@@ -101,7 +182,7 @@ public class CommentRestController {
      */
     @PutMapping("/edit")
     public ResponseEntity<Comment> editComment(@RequestBody CommentEditRequest request,
-                                                 @RequestHeader("Authorization") String accessToken) {
+                                               @RequestHeader("Authorization") String accessToken) {
         return commentService.editComment(request, accessToken);
     }
 

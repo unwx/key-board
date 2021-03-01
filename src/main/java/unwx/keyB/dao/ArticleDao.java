@@ -9,7 +9,7 @@ import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
 import unwx.keyB.dao.utils.impl.ArticleComplexDaoUtilsImpl;
 import unwx.keyB.domains.Article;
-import unwx.keyB.exceptions.internal.sql.SqlIllegalArgumentException;
+import unwx.keyB.exceptions.internal.dao.SqlIllegalArgumentException;
 
 import java.util.Collections;
 import java.util.List;
@@ -97,4 +97,15 @@ public class ArticleDao implements DefaultDAO<Article, Long> {
         return dao.readManyEager(linkedId, columns, requests, where, limit);
     }
 
+    @Override
+    public List<Article> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                      @NotNull List<SqlTableRequest> requests) {
+        return dao.readLinkedEntitiesManyToMany(linkedIds, requests);
+    }
+
+    @Override
+    public List<Article> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                      @NotNull SqlTableRequest requests) {
+        return dao.readLinkedEntitiesManyToMany(linkedIds, requests);
+    }
 }

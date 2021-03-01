@@ -2,11 +2,11 @@ package unwx.keyB.dto;
 
 public class ArticleEditRequest extends ArticleCreateRequest{
 
-    private final long targetId;
+    private final Long targetId;
 
     public ArticleEditRequest(String text,
                               String title,
-                              long targetId) {
+                              Long targetId) {
         super(text, title);
         this.targetId = targetId;
     }

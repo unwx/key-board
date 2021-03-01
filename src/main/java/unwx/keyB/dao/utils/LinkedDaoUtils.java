@@ -3,11 +3,12 @@ package unwx.keyB.dao.utils;
 import org.hibernate.Session;
 import unwx.keyB.dao.sql.SqlGenerator;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
+import unwx.keyB.exceptions.internal.dao.SqlIllegalArgumentException;
 
 import java.io.Serializable;
 import java.util.List;
 
-public class LinkedDaoUtils<Entity, Key extends Serializable> {
+public class LinkedDaoUtils<Entity, Key extends Serializable> extends DaoUtils{
 
     private final SqlGenerator sqlGenerator = new SqlGenerator();
     private final ComplexDaoUtils<Entity, Key> daoUtils;
@@ -30,6 +31,30 @@ public class LinkedDaoUtils<Entity, Key extends Serializable> {
                                 Entity e,
                                 Session session) {
         _setLinkedEntity(linkedId, request, e, session);
+    }
+
+    public void setLinkedEntitiesManyToMany(List<Object> linkedIds,
+                                            List<SqlTableRequest> requests,
+                                            List<Entity> entities,
+                                            Session session) {
+        if (linkedIds.size() != entities.size())
+            throw new SqlIllegalArgumentException("list<id>.size must be equal list<entity>.size!");
+
+        for (int i = 0; i < linkedIds.size(); i++) {
+            _setLinkedEntity(linkedIds.get(i), requests.get(i), entities.get(i), session);
+        }
+    }
+
+    public void setLinkedEntitiesManyToMany(List<Object> linkedIds,
+                                            SqlTableRequest request,
+                                            List<Entity> entities,
+                                            Session session) {
+        if (linkedIds.size() != entities.size())
+            throw new SqlIllegalArgumentException("list<id>.size must be equal list<entity>.size!");
+
+        for (int i = 0; i < linkedIds.size(); i++) {
+            _setLinkedEntity(linkedIds.get(i), request, entities.get(i), session);
+        }
     }
 
     @SuppressWarnings("unchecked")

@@ -9,7 +9,7 @@ import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
 import unwx.keyB.dao.utils.impl.CommentComplexDaoUtilsImpl;
 import unwx.keyB.domains.Comment;
-import unwx.keyB.exceptions.internal.sql.SqlIllegalArgumentException;
+import unwx.keyB.exceptions.internal.dao.SqlIllegalArgumentException;
 
 import java.io.Serial;
 import java.util.ArrayList;
@@ -31,15 +31,21 @@ public class CommentDao implements DefaultDAO<Comment, Long> {
     public Long save(@NotNull Comment e,
                      @NotNull SaveType s) throws SqlIllegalArgumentException {
         if (s == SaveType.CREATE) {
-            return dao.create(e, new ArrayList<>() {
-                @Serial
-                private static final long serialVersionUID = -8378278176449186609L;
+            if (e.getAuthor() != null && e.getArticle() != null
+                    && e.getAuthor().getId() != null && e.getArticle().getId() != null) {
+                return dao.create(e, new ArrayList<>() {
+                    @Serial
+                    private static final long serialVersionUID = -8378278176449186609L;
 
-                {
-                    add(new SqlField(e.getAuthor(), "user_id"));
-                    add(new SqlField(e.getArticle(), "article_id"));
-                }
-            });
+                    {
+                        add(new SqlField(e.getAuthor().getId(), "user_id"));
+                        add(new SqlField(e.getArticle().getId(), "article_id"));
+                    }
+                });
+            }
+            else {
+                throw new SqlIllegalArgumentException("author.id & article.id must be not null!");
+            }
         }
         if (s == SaveType.UPDATE) {
             if (e.getId() != null) {
@@ -102,5 +108,17 @@ public class CommentDao implements DefaultDAO<Comment, Long> {
                                        @NotNull String where,
                                        short limit) {
         return dao.readManyEager(linkedId, columns, requests, where, limit);
+    }
+
+    @Override
+    public List<Comment> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                      @NotNull List<SqlTableRequest> requests) {
+        return dao.readLinkedEntitiesManyToMany(linkedIds, requests);
+    }
+
+    @Override
+    public List<Comment> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds,
+                                                      @NotNull SqlTableRequest requests) {
+        return dao.readLinkedEntitiesManyToMany(linkedIds, requests);
     }
 }

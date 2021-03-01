@@ -4,7 +4,7 @@ import unwx.keyB.dao.sql.entities.DatabaseTable;
 import unwx.keyB.dao.sql.entities.SqlAttributesExtractor;
 import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlQueryAttributes;
-import unwx.keyB.exceptions.internal.sql.SqlNullPrimaryKeyException;
+import unwx.keyB.exceptions.internal.dao.SqlNullPrimaryKeyException;
 
 import java.util.LinkedList;
 import java.util.List;

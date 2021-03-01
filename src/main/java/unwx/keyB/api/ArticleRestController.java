@@ -30,7 +30,6 @@ public class ArticleRestController {
     }
 
     /**
-     * @deprecated
      * @uri
      * /api/article
      *
@@ -51,17 +50,17 @@ public class ArticleRestController {
      *          link: string
      *          text: string
      *          creationDate: string
+     *          likes: int
      *      }
      *      ...
      * ]
      */
     @GetMapping()
-    public ResponseEntity<List<Article>> getAll(@RequestBody PieceOfInformationRequest request){
+    public ResponseEntity<List<Article>> get(@RequestBody PieceOfInformationRequest request){
          return articleService.get(request);
     }
 
     /**
-     * @deprecated
      * @uri
      * /api/article/{id}
      *
@@ -82,6 +81,7 @@ public class ArticleRestController {
      *     link: string
      *     text: string
      *     creationDate: string
+     *     likes: int
      * }
      *
      * (ResourceNotFoundException):

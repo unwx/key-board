@@ -5,7 +5,7 @@ import unwx.keyB.dao.entities.DeleteType;
 import unwx.keyB.dao.entities.SaveType;
 import unwx.keyB.dao.sql.entities.SqlField;
 import unwx.keyB.dao.sql.entities.SqlTableRequest;
-import unwx.keyB.exceptions.internal.sql.SqlIllegalArgumentException;
+import unwx.keyB.exceptions.internal.dao.SqlIllegalArgumentException;
 
 import java.util.List;
 
@@ -26,5 +26,9 @@ public interface DefaultDAO<Entity, Key> {
     Entity readEager(@NotNull final Object linkedId, @NotNull final List<String> columns, @NotNull final List<SqlTableRequest> nestedEntities, @NotNull final SqlField where);
 
     List<Entity> readManyEager(@NotNull final Object linkedId, @NotNull final List<String> columns, @NotNull final List<SqlTableRequest> nestedEntities, @NotNull final String where, final short limit);
+
+    List<Entity> readLinkedEntitiesManyToMany(@NotNull final List<Object> linkedIds, @NotNull final List<SqlTableRequest> requests);
+
+    List<Entity> readLinkedEntitiesManyToMany(@NotNull final List<Object> linkedIds, @NotNull final SqlTableRequest requests);
 
 }

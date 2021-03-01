@@ -2,19 +2,19 @@ package unwx.keyB.dto;
 
 public class PieceOfInformationRequest {
 
-    private final int startIndex;
-    private final short size;
+    private final Integer start;
+    private final Short size;
 
-    public PieceOfInformationRequest(int startIndex, short size) {
-        this.startIndex = startIndex;
+    public PieceOfInformationRequest(Integer start, Short size) {
+        this.start = start;
         this.size = size;
     }
 
-    public int getStartIndex() {
-        return startIndex;
+    public Integer getSelectIndex() {
+        return start;
     }
 
-    public short getSize() {
+    public Short getSize() {
         return size;
     }
 }

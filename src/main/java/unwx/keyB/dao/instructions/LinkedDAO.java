@@ -14,4 +14,8 @@ public interface LinkedDAO<Entity, Key> extends DAO<Entity, Key> {
     Entity readLinkedEntity(@NotNull Object linkedId, @NotNull final SqlTableRequest request);
 
     Entity readLinkedEntities(@NotNull Object linkedId, @NotNull final List<SqlTableRequest> request);
+
+    List<Entity> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds, @NotNull List<SqlTableRequest> requests);
+
+    List<Entity> readLinkedEntitiesManyToMany(@NotNull List<Object> linkedIds, @NotNull SqlTableRequest requests);
 }
