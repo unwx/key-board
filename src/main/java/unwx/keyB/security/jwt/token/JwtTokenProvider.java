@@ -31,8 +31,8 @@ import java.util.Date;
 @Component
 public class JwtTokenProvider {
 
-    private final String publicPath = "D:\\JavaApps\\keyB\\keys_rsa_2048\\public.pem";
-    private final String privatePath = "D:\\JavaApps\\keyB\\keys_rsa_2048\\private8.pem";
+    private final String publicPath = "/home/unwx/IdeaProjects/key-board/keys_rsa_2048/public.pem";
+    private final String privatePath = "/home/unwx/IdeaProjects/key-board/keys_rsa_2048/private8.pem";
 
     private final RSAPublicKey publicKey = (RSAPublicKey) PemUtils.readPublicKeyFromFile(publicPath, "RSA");
     private final RSAPrivateKey privateKey = (RSAPrivateKey) PemUtils.readPrivateKeyFromFile(privatePath, "RSA");
